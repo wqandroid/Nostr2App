@@ -37,7 +37,7 @@ interface FeedDao {
     @Query("SELECT * FROM feed_info")
     suspend fun getAll(): List<FeedItem>
 
-    @Insert(onConflict = OnConflictStrategy.ABORT)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertFeed(feed: FeedItem)
 
 }

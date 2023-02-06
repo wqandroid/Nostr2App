@@ -42,9 +42,19 @@ class HomeFragment : Fragment() {
 
         feedViewModel.feedLiveData.observe(viewLifecycleOwner){
             adapter.updateData(it)
+            binding.rvFeed.scrollTo(0,0)
         }
 
         feedViewModel.loadFeedFromDB()
 
     }
+
+    override fun onResume() {
+        super.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+    }
+
 }

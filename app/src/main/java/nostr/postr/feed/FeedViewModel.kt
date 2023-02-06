@@ -83,7 +83,7 @@ class FeedViewModel : ViewModel() {
         Client.lenient = true
 
         val filter = JsonFilter(
-            since = 1675666229,
+            since = 1675694236,
 //            until = 1675667229,
             limit = 20,
 //            authors = mutableListOf("npub1n6tkfw2ptvhlpcj8x03lu6zeytnekjqjc6k5z257q4z8z5lstjas26nls2")
@@ -92,9 +92,8 @@ class FeedViewModel : ViewModel() {
 ////                   this.add("npub1n6tkfw2ptvhlpcj8x03lu6zeytnekjqjc6k5z257q4z8z5lstjas26nls2")
 //                }
         )
-//        Client.connect()
-//        Client.requestAndWatch(filters = mutableListOf(filter))
-
+        Client.connect()
+        Client.requestAndWatch(filters = mutableListOf(filter))
 
     }
 

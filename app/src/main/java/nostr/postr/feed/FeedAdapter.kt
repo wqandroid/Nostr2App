@@ -7,6 +7,7 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import nostr.postr.R
+import nostr.postr.Utils
 import nostr.postr.db.FeedItem
 
 
@@ -21,6 +22,7 @@ class FeedAdapter(var listData: MutableList<FeedItem>) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item: FeedItem = listData[position]
         holder.tv_content.text = item.content
+        holder.tv_time.text="${item.created_at}"
     }
 
     fun updateData( list: List<FeedItem>){
@@ -34,10 +36,11 @@ class FeedAdapter(var listData: MutableList<FeedItem>) :
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 //        var imageView: ImageView
         var tv_content: TextView
-
+        var tv_time: TextView
         init {
 //            imageView = itemView.findViewById(R.id.imageView) as ImageView
             tv_content = itemView.findViewById(R.id.tv_content)
+            tv_time = itemView.findViewById(R.id.tv_time)
         }
     }
 }
