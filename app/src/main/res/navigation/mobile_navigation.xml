@@ -4,29 +4,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
     app:startDestination="@+id/navigation_home">
+
     <fragment
         android:id="@+id/navigation_home"
         android:name="nostr.postr.ui.home.HomeFragment"
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home" />
+
     <fragment
-        android:id="@+id/navigation_feed"
-        android:name="nostr.postr.ui.feed.FeedFragment"
-        android:label="@string/title_feed"
-        tools:layout="@layout/fragment_feed" />
+        android:id="@+id/navigation_dashboard"
+        android:name="nostr.postr.ui.dashboard.DashboardFragment"
+        android:label="@string/title_dashboard"
+        tools:layout="@layout/fragment_dashboard" />
+
     <fragment
         android:id="@+id/navigation_notifications"
         android:name="nostr.postr.ui.notifications.NotificationsFragment"
         android:label="@string/title_notifications"
         tools:layout="@layout/fragment_notifications" />
-    <fragment
-        android:id="@+id/navigation_messages"
-        android:name="nostr.postr.ui.messages.MessagesFragment"
-        android:label="@string/title_messages"
-        tools:layout="@layout/fragment_messages" />
-    <fragment
-        android:id="@+id/navigation_search"
-        android:name="nostr.postr.ui.search.SearchFragment"
-        android:label="@string/title_search"
-        tools:layout="@layout/fragment_search" />
 </navigation>

@@ -1,19 +1,17 @@
-package nostr.postr.ui.home
+package nostr.postr.feed
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import nostr.postr.databinding.FragmentFeedBinding
-import nostr.postr.databinding.FragmentHomeBinding
-import nostr.postr.feed.FeedAdapter
-import nostr.postr.feed.FeedViewModel
+import nostr.postr.db.FeedItem
 
-class HomeFragment : Fragment() {
+class FeedFragment : Fragment() {
+
     private lateinit var binding: FragmentFeedBinding
     private lateinit var feedViewModel: FeedViewModel
 
@@ -37,14 +35,15 @@ class HomeFragment : Fragment() {
         adapter= FeedAdapter(mutableListOf())
 
         binding.rvFeed.adapter=adapter
-        binding.rvFeed.layoutManager= LinearLayoutManager(requireContext())
+        binding.rvFeed.layoutManager=LinearLayoutManager(requireContext())
         binding.rvFeed.hasFixedSize()
 
         feedViewModel.feedLiveData.observe(viewLifecycleOwner){
-            adapter.updateData(it)
+          adapter.updateData(it)
         }
 
         feedViewModel.loadFeedFromDB()
 
     }
+
 }

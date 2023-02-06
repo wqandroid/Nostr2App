@@ -31,9 +31,13 @@ class Relay(
 
             override fun onMessage(webSocket: WebSocket, text: String) {
                 try {
+                    println("------------------")
+                    println(text)
+                    println("------------------")
                     val msg = Event.gson.fromJson(text, JsonElement::class.java).asJsonArray
                     val type = msg[0].asString
                     val channel = msg[1].asString
+
                     when (type) {
                         "EVENT" -> {
                             val event = Event.fromJson(msg[2], Client.lenient)
@@ -93,6 +97,7 @@ class Relay(
             Client.subscriptions[requestId] ?: error("No filter(s) found.")
         }
         val request = """["REQ","$requestId",${filters.joinToString(",") { it.toJson() }}]"""
+        print("ws_send_request_msg----$request")
         socket.send(request)
     }
 

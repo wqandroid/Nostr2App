@@ -22,6 +22,11 @@ class RecommendRelayEvent(
             URI.create(content)
     }
 
+    fun asFeed(){
+
+    }
+
+
     companion object {
         const val kind = 2
 

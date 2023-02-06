@@ -1,12 +1,13 @@
-package nostr.postr.ui.feed
+package nostr.postr.ui.dashboard
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class FeedViewModel : ViewModel() {
+class DashboardViewModel : ViewModel() {
+
     private val _text = MutableLiveData<String>().apply {
-        value = "This is feed Fragment"
+        value = "This is dashboard Fragment"
     }
     val text: LiveData<String> = _text
 }

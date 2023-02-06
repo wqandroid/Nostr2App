@@ -1,55 +1,20 @@
 package nostr.postr
 
 import android.os.Bundle
-import android.util.Log
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import nostr.postr.databinding.ActivityMainBinding
-import nostr.postr.events.*
 
 class MainActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivityMainBinding
-    private val clientListener = object : Client.Listener() {
-        override fun onNewEvent(event: Event, subscriptionId: String) {
-            when (event.kind) {
-                MetadataEvent.kind, // 0
-                TextNoteEvent.kind, // 1
-                RecommendRelayEvent.kind, // 2
-                ContactListEvent.kind, // 3
-                PrivateDmEvent.kind, // 4
-                DeletionEvent.kind, // 5
-                in listOf(6, 7, 17, 30, 40, 7357) -> Unit
-                else -> Log.d("UNHANDLED_EVENT", event.toJson())
-            }
-        }
-
-        override fun onError(error: Error, subscriptionId: String, relay: Relay) {
-            Log.e("ERROR", "Relay ${relay.url}: ${error.message}")
-        }
-
-        override fun onRelayStateChange(type: Relay.Type, relay: Relay) {
-            Log.d("RELAY", "Relay ${relay.url} ${when (type) {
-                Relay.Type.CONNECT -> "connected."
-                Relay.Type.DISCONNECT -> "disconnected."
-                Relay.Type.EOSE -> "sent all events it had stored."
-            }}")
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        Client.subscribe(clientListener)
-        Client.lenient = true
-        val filter = JsonFilter(
-            since = 1652305L
-        )
-        Client.connect()
-        Client.requestAndWatch(filters = mutableListOf(filter))
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -61,7 +26,7 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_home, R.id.navigation_feed, R.id.navigation_notifications, R.id.navigation_messages, R.id.navigation_search
+                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
