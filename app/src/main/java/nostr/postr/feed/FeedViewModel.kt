@@ -6,20 +6,20 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
-import nostr.postr.Client
-import nostr.postr.JsonFilter
-import nostr.postr.MyApplication
-import nostr.postr.Relay
+import nostr.postr.*
 import nostr.postr.db.NostrDB
+import nostr.postr.db.UserProfile
 import nostr.postr.events.*
 
 class FeedViewModel : ViewModel() {
-    val feedLiveData = MutableLiveData<List<nostr.postr.db.FeedItem>>()
+    val feedLiveData = MutableLiveData<List<Feed>>()
 
 
     private val scope = CoroutineScope(Job() + Dispatchers.IO)
 
     private var count = 0
+
+    private var profileList = mutableListOf<String>()
 
     private val clientListener = object : Client.Listener() {
         override fun onNewEvent(event: Event, subscriptionId: String) {
@@ -33,30 +33,60 @@ class FeedViewModel : ViewModel() {
                 in listOf(6, 7, 17, 30, 40, 7357) -> Unit
 //                else -> Log.d("UNHANDLED_EVENT", event.toJson())
             }
-            if (event.kind == TextNoteEvent.kind) {
-                Log.d("TextNoteEvent--->", event.toJson())
+            when (event.kind) {
+                MetadataEvent.kind -> {
+                    val metadataEvent = event as MetadataEvent
+                    Log.e("MetadataEvent--->", event.toJson())
 
-                scope.launch {
-
-                    val textEvent=event as TextNoteEvent
-
-                    var feed = nostr.postr.db.FeedItem(
-                        textEvent.id.toString(),
-                        textEvent.pubKey.toString(),
-                        textEvent.createdAt,
-                        textEvent.content
-                    )
-                    NostrDB.getDatabase(MyApplication.getInstance())
-                        .feedDao().insertFeed(feed)
-                    Log.d("TextNoteEvent--->", "插入成功")
-                    count++
-                    if (count % 20 == 0) {
-                        loadFeedFromDB()
+                    metadataEvent.contactMetaData?.let {
+                        val userProfile = UserProfile(event.pubKey.toHex()).apply {
+                            this.name = it.name
+                            this.about = it.about
+                            this.picture = it.picture
+                            this.nip05 = it.nip05
+                        }
+                        Log.e("MetadataEvent--->", "---->${userProfile.name}")
+                        scope.launch {
+                            NostrDB.getDatabase(MyApplication.getInstance())
+                                .profileDao().insertUser(userProfile)
+                        }
                     }
-                }
 
-            } else if (event.kind == RecommendRelayEvent.kind) {
-                Log.d("RecommendRelayEvent--->", event.toJson())
+                }
+                TextNoteEvent.kind -> {
+
+                    scope.launch {
+
+                        val textEvent = event as TextNoteEvent
+
+                        var feed = nostr.postr.db.FeedItem(
+                            textEvent.id.toString(),
+                            textEvent.pubKey.toHex(),
+                            textEvent.createdAt,
+                            textEvent.content
+                        )
+                        NostrDB.getDatabase(MyApplication.getInstance())
+                            .feedDao().insertFeed(feed)
+                        count++
+                        if (count % 20 == 0) {
+                            loadFeedFromDB()
+                        }
+
+                        val userProfile = NostrDB.getDatabase(MyApplication._instance).profileDao()
+                            .getUserInfo(feed.pubkey)
+                        if (userProfile == null) {
+                            profileList.add(feed.pubkey)
+                            if (profileList.size >= 20) {
+                                reqProfile()
+                            }
+                        }
+
+                    }
+
+                }
+                RecommendRelayEvent.kind -> {
+                    Log.d("RecommendRelayEvent--->", event.toJson())
+                }
             }
         }
 
@@ -79,33 +109,67 @@ class FeedViewModel : ViewModel() {
 
 
     fun reqFeed() {
-        Client.subscribe(clientListener)
-        Client.lenient = true
 
-        val filter = JsonFilter(
-            since = 1675694236,
-//            until = 1675667229,
-            limit = 20,
-//            authors = mutableListOf("npub1n6tkfw2ptvhlpcj8x03lu6zeytnekjqjc6k5z257q4z8z5lstjas26nls2")
-//                .apply {
-//                    this.add("b6d43020a8edc6f7f66e63e592456e1fc6eb2d5ed426247b1346f994168d2dc5")
-////                   this.add("npub1n6tkfw2ptvhlpcj8x03lu6zeytnekjqjc6k5z257q4z8z5lstjas26nls2")
-//                }
-        )
-        Client.connect()
-        Client.requestAndWatch(filters = mutableListOf(filter))
+        scope.launch {
+            val sinceTime = NostrDB.getDatabase(MyApplication._instance)
+                .feedDao().getLast()?.created_at ?: System.currentTimeMillis() / 1000
+
+            Client.subscribe(clientListener)
+            Client.lenient = true
+
+            val filter = JsonFilter(
+                since = sinceTime,
+                limit = 20,
+            )
+            Client.connect()
+            Client.requestAndWatch(filters = mutableListOf(filter))
+
+        }
+
 
     }
+
+    fun reqProfile() {
+        scope.launch {
+            val temp = mutableListOf<String>()
+            temp.addAll(profileList)
+            profileList.clear()
+//                Client.subscribe(clientListener)
+            val filter = JsonFilter(
+                kinds = mutableListOf(0),
+                since = 1675748168,
+                limit = 20,
+                authors = temp
+            )
+//                Client.connect()
+            Client.requestAndWatch(filters = mutableListOf(filter))
+        }
+    }
+
 
     fun loadFeedFromDB() {
         scope.launch {
             val list = NostrDB.getDatabase(MyApplication._instance)
-                .feedDao().getAll().sortedByDescending {
-                    it.created_at
-                }
-            withContext(Dispatchers.Main) {
-                feedLiveData.value = list
+                .feedDao().getAll()
+
+            val feedList = mutableListOf<Feed>()
+            list.forEach {
+                val userProfile = NostrDB.getDatabase(MyApplication._instance).profileDao()
+                    .getUserInfo(it.pubkey)
+                feedList.add(Feed(it, userProfile))
             }
+
+            withContext(Dispatchers.Main) {
+                feedLiveData.value = feedList
+            }
+//            list.forEach {
+//                val userProfile = NostrDB.getDatabase(MyApplication._instance).profileDao()
+//                    .getUserInfo(it.pubkey)
+//                if (userProfile == null) {
+//                    profileList.add(it.pubkey)
+//                }
+//            }
+//            reqProfile()
         }
     }
 

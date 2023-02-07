@@ -31,9 +31,9 @@ class Relay(
 
             override fun onMessage(webSocket: WebSocket, text: String) {
                 try {
-                    println("------------------")
-                    println(text)
-                    println("------------------")
+//                    println("------------------")
+//                    println(text)
+//                    println("------------------")
                     val msg = Event.gson.fromJson(text, JsonElement::class.java).asJsonArray
                     val type = msg[0].asString
                     val channel = msg[1].asString

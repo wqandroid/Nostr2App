@@ -17,9 +17,9 @@ abstract class NostrDB : RoomDatabase() {
     //
     companion object{
         private  var appDatabase: NostrDB?=null
-        open fun getDatabase(context: Context): NostrDB {
+         fun getDatabase(context: Context): NostrDB {
             if (appDatabase == null) {
-                appDatabase = Room.databaseBuilder(context, NostrDB::class.java, "nor2.db")
+                appDatabase = Room.databaseBuilder(context, NostrDB::class.java, "nor3.db")
                     .fallbackToDestructiveMigration()
                     .allowMainThreadQueries()
                     .build()
@@ -34,11 +34,19 @@ abstract class NostrDB : RoomDatabase() {
 
 @Dao
 interface FeedDao {
-    @Query("SELECT * FROM feed_info")
+    @Query("SELECT * FROM feed_info ORDER BY created_at DESC LIMIT 100")
     suspend fun getAll(): List<FeedItem>
+    @Query("SELECT * FROM feed_info ORDER BY created_at DESC LIMIT 1")
+    suspend fun getLast():FeedItem?
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertFeed(feed: FeedItem)
+
+    @Query("SELECT COUNT(*)  FROM feed_info ")
+    suspend fun getCount():Int
+
+    @Delete
+    suspend fun delete(feed: FeedItem):Int
 
 }
 

@@ -27,7 +27,7 @@ class HomeFragment : Fragment() {
         feedViewModel =
             ViewModelProvider(this)[FeedViewModel::class.java]
         binding = FragmentFeedBinding.inflate(inflater, container, false)
-        feedViewModel.reqFeed()
+
         return binding.root
     }
 
@@ -44,7 +44,7 @@ class HomeFragment : Fragment() {
             adapter.updateData(it)
             binding.rvFeed.scrollTo(0,0)
         }
-
+//        feedViewModel.reqFeed()
         feedViewModel.loadFeedFromDB()
 
     }
