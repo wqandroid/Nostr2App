@@ -7,9 +7,20 @@
     android:layout_height="match_parent"
     tools:context=".feed.FeedFragment">
 
+    <com.google.android.material.appbar.MaterialToolbar
+        android:layout_width="match_parent"
+        app:title="Global Feed"
+        app:titleCentered="true"
+        app:navigationIconTint="@color/md_theme_onBackground"
+        android:id="@+id/toolbar"
+        app:navigationIcon="@drawable/baseline_menu_24"
+        android:layout_height="wrap_content"/>
+
+
     <com.google.android.material.button.MaterialButton
         android:text="新增动态（1）点击加载"
         android:id="@+id/mbt_feed_load"
+        android:layout_margin="6dp"
         android:layout_gravity="center_horizontal"
         app:icon="@drawable/baseline_whatshot_24"
         android:layout_width="wrap_content"

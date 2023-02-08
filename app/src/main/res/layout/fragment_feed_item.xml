@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -66,7 +65,7 @@
             <ImageView
                 android:background="@color/md_theme_secondaryContainer"
                 android:id="@+id/iv_content_img"
-                android:visibility="visible"
+                android:visibility="gone"
                 android:layout_marginStart="12dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintBottom_toTopOf="@id/tv_time"
@@ -89,12 +88,11 @@
             <ImageView
                 android:id="@+id/iv_more"
                 app:tint="@color/md_theme_onTertiaryContainer"
-                app:layout_constraintTop_toTopOf="@id/iv_avatar"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="@id/iv_avatar"
-                android:src="@drawable/baseline_more_vert_24"
+                android:src="@drawable/baseline_disabled_visible_24"
                 android:layout_width="wrap_content"
-                android:layout_marginEnd="6dp"
+                android:padding="12dp"
                 android:scaleType="center"
                 android:layout_height="wrap_content"/>
 

@@ -1,6 +1,7 @@
 package nostr.postr
 
 import android.app.Application
+import com.tencent.mmkv.MMKV
 
 class MyApplication: Application() {
 
@@ -8,6 +9,7 @@ class MyApplication: Application() {
     override fun onCreate() {
         super.onCreate()
         _instance=this
+        MMKV.initialize(this)
     }
 
     companion object{
