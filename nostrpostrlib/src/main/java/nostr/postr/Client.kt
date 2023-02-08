@@ -1,6 +1,7 @@
 package nostr.postr
 
 import nostr.postr.events.Event
+import java.util.Objects
 import java.util.UUID
 
 /**
@@ -8,7 +9,7 @@ import java.util.UUID
  * published through multiple relays.
  * Events are stored with their respective persona.
  */
-object Client: RelayPool.Listener {
+object Client : RelayPool.Listener {
     /**
      * Lenient mode:
      *
@@ -19,32 +20,41 @@ object Client: RelayPool.Listener {
      *        something.
      **/
     var lenient: Boolean = false
-    val personae: Array<Persona> = emptyArray()
     private val listeners = HashSet<Listener>()
     internal var relays = Constants.defaultRelays
     internal val subscriptions: MutableMap<String, MutableList<JsonFilter>> = mutableMapOf()
 
+
     fun connect(
-        relays: Array<Relay> = Constants.defaultRelays
+        relays: List<Relay> = Constants.defaultRelays
     ) {
-        RelayPool.register(this)
-        RelayPool.loadRelays(relays.toList())
-        this.relays = relays
+        synchronized(this){
+            val temp=relays.filter {
+                it.enable
+            }.toList()
+            RelayPool.register(this)
+            RelayPool.loadRelays(temp)
+            this.relays =temp
+        }
     }
 
     fun requestAndWatch(
         subscriptionId: String = UUID.randomUUID().toString().substring(0..10),
         filters: MutableList<JsonFilter> = mutableListOf(JsonFilter())
     ) {
-        subscriptions[subscriptionId] = filters
-        RelayPool.requestAndWatch(subscriptionId)
+        synchronized(this){
+            subscriptions[subscriptionId] = filters
+            RelayPool.requestAndWatch(subscriptionId)
+        }
     }
 
     fun send(signedEvent: Event) {
-        RelayPool.send(signedEvent)
+        synchronized(this){
+            RelayPool.send(signedEvent)
+        }
     }
 
-    fun close(subscriptionId: String){
+    fun close(subscriptionId: String) {
         RelayPool.close(subscriptionId)
     }
 
@@ -54,7 +64,9 @@ object Client: RelayPool.Listener {
     }
 
     override fun onEvent(event: Event, subscriptionId: String, relay: Relay) {
-        listeners.forEach { it.onEvent(event, subscriptionId, relay) }
+        synchronized(this){
+            listeners.forEach { it.onEvent(event, subscriptionId, relay) }
+        }
     }
 
     override fun onNewEvent(event: Event, subscriptionId: String) {

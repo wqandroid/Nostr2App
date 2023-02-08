@@ -1,6 +1,7 @@
 package nostr.postr
 
 import android.app.Application
+import com.google.android.material.color.DynamicColors
 import com.tencent.mmkv.MMKV
 
 class MyApplication: Application() {
@@ -10,6 +11,7 @@ class MyApplication: Application() {
         super.onCreate()
         _instance=this
         MMKV.initialize(this)
+        DynamicColors.applyToActivitiesIfAvailable(this)
     }
 
     companion object{

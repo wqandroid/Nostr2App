@@ -8,11 +8,16 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import fr.acinq.secp256k1.Hex
 import nostr.postr.R
 import nostr.postr.Utils
+import nostr.postr.bechToBytes
 import nostr.postr.databinding.FragmentFeedItemBinding
 import nostr.postr.db.FeedItem
 import nostr.postr.db.UserProfile
+import nostr.postr.toNpub
+import nostr.postr.util.UIUtils.makeGone
+import nostr.postr.util.UIUtils.makeVisibility
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -37,7 +42,28 @@ class FeedAdapter(var listData: MutableList<Feed>) :
         val item: Feed = listData[position]
         holder.binding.tvContent.text = item.feedItem.content
         holder.binding.tvTime.text = parseTime(item.feedItem.created_at)
-        holder.binding.tvName.text = item.userProfile?.name ?: item.feedItem.pubkey
+        holder.binding.tvName.text = item.userProfile?.display_name ?: item.userProfile?.name?:item.feedItem.pubkey
+
+
+        if (item.userProfile == null || item.userProfile.name.isNullOrEmpty()){
+            holder.binding.tvDesc.makeGone()
+            holder.binding.tvName.text=Hex.decode(item.feedItem.pubkey).toNpub()
+            holder.binding.tvNip05.makeGone()
+        }else{
+            holder.binding.tvDesc.makeVisibility()
+            holder.binding.tvDesc.text= Hex.decode(item.feedItem.pubkey).toNpub()
+            holder.binding.tvName.text=item.userProfile.display_name ?:item.userProfile.name
+
+            if (item.userProfile.nip05?.isNotEmpty()==true){
+                holder.binding.tvNip05.makeVisibility()
+                holder.binding.tvNip05.text=item.userProfile.nip05
+            }else{
+                holder.binding.tvNip05.makeGone()
+            }
+        }
+
+
+
 
         Glide.with(holder.binding.ivAvatar).load(item.userProfile?.picture).into(
             holder.binding.ivAvatar

@@ -1,10 +1,13 @@
 package nostr.postr.ui.home
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,6 +17,7 @@ import nostr.postr.databinding.FragmentHomeBinding
 import nostr.postr.feed.Feed
 import nostr.postr.feed.FeedAdapter
 import nostr.postr.feed.FeedViewModel
+import nostr.postr.util.MD5
 import nostr.postr.util.UIUtils.makeGone
 import nostr.postr.util.UIUtils.makeVisibility
 
@@ -48,7 +52,6 @@ class HomeFragment : Fragment(), FeedAdapter.ItemChildClickListener {
             adapter.updateData(it)
         }
         feedViewModel.loadBlockUser()
-//        feedViewModel.reqFeed()
         feedViewModel.loadFeedFromDB()
 
         adapter.clickListener = this
@@ -65,21 +68,31 @@ class HomeFragment : Fragment(), FeedAdapter.ItemChildClickListener {
 
         binding.mbtFeedLoad.setOnClickListener {
             feedViewModel.loadFeedFromDB()
+            binding.mbtFeedLoad.makeGone()
         }
+
+        binding.toolbar.setOnClickListener {
+            requireActivity().findViewById<DrawerLayout>(R.id.drawer_layout)
+                .openDrawer(GravityCompat.START)
+        }
+
     }
 
     override fun onClick(feed: Feed, itemView: View) {
         if (itemView.id == R.id.iv_more) {
-            feedViewModel.addBlock(feed.feedItem.pubkey)
+            Log.e("account","block${MD5.md5(feed.feedItem.content)}")
+            feedViewModel.addBlock(feed.feedItem.pubkey,feed.feedItem.content)
         }
     }
 
     override fun onResume() {
         super.onResume()
+        feedViewModel.reqFeed()
     }
 
     override fun onPause() {
         super.onPause()
+        feedViewModel.stopSubFeed()
     }
 
 

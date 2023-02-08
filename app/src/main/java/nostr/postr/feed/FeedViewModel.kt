@@ -11,6 +11,7 @@ import nostr.postr.db.BlockUser
 import nostr.postr.db.NostrDB
 import nostr.postr.db.UserProfile
 import nostr.postr.events.*
+import nostr.postr.util.MD5
 
 class FeedViewModel : ViewModel() {
 
@@ -22,7 +23,7 @@ class FeedViewModel : ViewModel() {
 
 
     private val blockList = mutableListOf<String>()
-
+    private val blockContentList = mutableListOf<String>()
 
     private var count = 0
 
@@ -43,7 +44,7 @@ class FeedViewModel : ViewModel() {
             when (event.kind) {
                 MetadataEvent.kind -> {
                     val metadataEvent = event as MetadataEvent
-                    Log.e("MetadataEvent--->", event.toJson())
+//                    Log.e("MetadataEvent--->", event.toJson())
 
                     metadataEvent.contactMetaData?.let {
                         val userProfile = UserProfile(event.pubKey.toHex()).apply {
@@ -51,10 +52,10 @@ class FeedViewModel : ViewModel() {
                             this.about = it.about
                             this.picture = it.picture
                             this.nip05 = it.nip05
-                            this.display_name=it.display_name
-                            this.banner=it.banner
-                            this.website=it.website
-                            this.lud16=it.lud16
+                            this.display_name = it.display_name
+                            this.banner = it.banner
+                            this.website = it.website
+                            this.lud16 = it.lud16
                         }
                         Log.e("MetadataEvent--->", "---->${userProfile.name}")
                         scope.launch {
@@ -70,7 +71,7 @@ class FeedViewModel : ViewModel() {
 
                         val textEvent = event as TextNoteEvent
 
-                        if (blockList.contains(textEvent.pubKey.toHex()))return@launch
+                        if (blockList.contains(textEvent.pubKey.toHex()) || blockContentList.contains(MD5.md5(textEvent.content))) return@launch
 
                         var feed = nostr.postr.db.FeedItem(
                             textEvent.id.toString(),
@@ -121,12 +122,17 @@ class FeedViewModel : ViewModel() {
     }
 
 
-    fun addBlock(pubKey: String) {
+    fun addBlock(pubKey: String, contentMD5: String) {
         scope.launch {
 
             NostrDB.getDatabase(MyApplication._instance)
-                .blockUserDao().insertBlockUser(BlockUser(pubKey))
-            loadBlockUser()
+                .blockUserDao().insertBlockUser(BlockUser(pubKey).apply {
+                    this.contentMD5 = MD5.md5(contentMD5)
+                })
+//            loadBlockUser()
+
+            blockList.add(pubKey)
+            blockContentList.add(contentMD5)
 
             //删除该用户下面的所有动态
             NostrDB.getDatabase(MyApplication._instance)
@@ -144,21 +150,30 @@ class FeedViewModel : ViewModel() {
     fun loadBlockUser() {
         scope.launch {
             blockList.clear()
+            blockContentList.clear()
+            val list = NostrDB.getDatabase(MyApplication._instance)
+                .blockUserDao().getAllBlock()
+
             blockList.addAll(
-                NostrDB.getDatabase(MyApplication._instance)
-                    .blockUserDao().getAllBlock().map { it.pubkey }
+                list.map { it.pubkey }
             )
+            list.forEach {
+                if (it.contentMD5.isNullOrEmpty()){
+                    blockContentList.add(it.contentMD5!!)
+                }
+            }
         }
     }
 
     fun reqFeed() {
 
         scope.launch {
-            val sinceTime = NostrDB.getDatabase(MyApplication._instance)
-                .feedDao().getLast()?.created_at ?: System.currentTimeMillis() / 1000
+            val sinceTime =
+//                NostrDB.getDatabase(MyApplication._instance)
+//                .feedDao().getLast()?.created_at ?:
+                System.currentTimeMillis() / 1000
 
             Client.subscribe(clientListener)
-            Client.lenient = true
 
             val filter = JsonFilter(
                 since = sinceTime,
@@ -170,6 +185,10 @@ class FeedViewModel : ViewModel() {
         }
 
 
+    }
+
+    fun stopSubFeed(){
+        Client.unsubscribe(listener = clientListener)
     }
 
     fun reqProfile() {
@@ -198,7 +217,7 @@ class FeedViewModel : ViewModel() {
             val feedList = mutableListOf<Feed>()
             list.forEach {
                 //拉黑的不展示
-                if (!blockList.contains(it.pubkey)) {
+                if (!blockList.contains(it.pubkey) && !blockContentList.contains(MD5.md5(it.content))) {
                     val userProfile = NostrDB.getDatabase(MyApplication._instance).profileDao()
                         .getUserInfo(it.pubkey)
                     feedList.add(Feed(it, userProfile))
@@ -207,7 +226,7 @@ class FeedViewModel : ViewModel() {
 
             withContext(Dispatchers.Main) {
                 feedLiveData.value = feedList
-                count=0
+                count = 0
             }
 
             //req profile
@@ -224,7 +243,7 @@ class FeedViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-        Client.unsubscribe(listener = clientListener)
+        stopSubFeed()
     }
 
 }

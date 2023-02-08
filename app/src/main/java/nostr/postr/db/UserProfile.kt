@@ -21,7 +21,7 @@ class UserProfile(
     var website: String? = null
 }
 
-@Entity(tableName = "block_user")
+@Entity(tableName = "block_user2")
 class BlockUser(@PrimaryKey val pubkey: String) {
-    var contentHash: Int? = 0
+    var contentMD5: String? = null
 }

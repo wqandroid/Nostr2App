@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.room.*
 
 
-@Database(entities = [FeedItem::class, UserProfile::class,BlockUser::class], version = 1)
+@Database(entities = [FeedItem::class, UserProfile::class, BlockUser::class], version = 1)
 abstract class NostrDB : RoomDatabase() {
 
 
@@ -72,11 +72,11 @@ interface BlockUserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBlockUser(user: BlockUser)
 
-    @Query("SELECT * FROM block_user")
+    @Query("SELECT * FROM block_user2")
     suspend fun getAllBlock(): List<BlockUser>
 
-    @Query("select * from block_user where pubkey =:s")
-    suspend fun getBlockUserInfo(s: String): BlockUser?
+    @Query("select * from block_user2 where pubkey =:s or contentMD5=:m")
+    suspend fun getBlockUserInfo(s: String, m: String): BlockUser?
 }
 
 

@@ -8,7 +8,8 @@ import kotlin.collections.HashSet
 class Relay(
     val url: String,
     var read: Boolean = true,
-    var write: Boolean = true
+    var write: Boolean = true,
+    var enable: Boolean = read && write
 ) {
     private val httpClient = OkHttpClient()
     private val listeners = HashSet<Listener>()
@@ -48,7 +49,11 @@ class Relay(
                         }
                         "NOTICE" -> listeners.forEach {
                             // "channel" being the second string in the string array ...
-                            it.onError(this@Relay, subscriptionId, Error("Relay sent notice: $channel"))
+                            it.onError(
+                                this@Relay,
+                                subscriptionId,
+                                Error("Relay sent notice: $channel")
+                            )
                         }
                         else -> listeners.forEach {
                             it.onError(
@@ -60,7 +65,13 @@ class Relay(
                     }
                 } catch (t: Throwable) {
                     text.chunked(2000) { chunked ->
-                        listeners.forEach { it.onError(this@Relay, subscriptionId, Error("Problem with $chunked")) }
+                        listeners.forEach {
+                            it.onError(
+                                this@Relay,
+                                subscriptionId,
+                                Error("Problem with $chunked")
+                            )
+                        }
                     }
                 }
             }
@@ -89,7 +100,13 @@ class Relay(
         val filters = if (reconnectTs != null) {
             Client.subscriptions[requestId]?.let {
                 it.map { filter ->
-                    JsonFilter(filter.ids, filter.authors, filter.kinds, filter.tags, since = reconnectTs)
+                    JsonFilter(
+                        filter.ids,
+                        filter.authors,
+                        filter.kinds,
+                        filter.tags,
+                        since = reconnectTs
+                    )
                 }
             } ?: error("No filter(s) found.")
             //Client.filters.map { JsonFilter(it.ids, it.authors, it.kinds, it.tags, since = reconnectTs) }
@@ -106,15 +123,17 @@ class Relay(
         print("ws_send_request_msg----${signedEvent.toJson()}")
     }
 
-    fun close(subscriptionId: String){
+    fun close(subscriptionId: String) {
         socket.send("""["CLOSE","$subscriptionId"]""")
     }
 
     enum class Type {
         // Websocket connected
         CONNECT,
+
         // Websocket disconnected
         DISCONNECT,
+
         // End Of Stored Events
         EOSE
     }

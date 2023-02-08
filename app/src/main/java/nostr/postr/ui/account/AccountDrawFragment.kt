@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
@@ -41,6 +42,16 @@ class AccountDrawFragment : Fragment() {
             }
         }
 
+        binding.mswitch.setOnClickListener {
+            if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+//                AppConfig.getInstance().saveNightModel(AppCompatDelegate.MODE_NIGHT_NO)
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+//                AppConfig.getInstance().saveNightModel(AppCompatDelegate.MODE_NIGHT_YES)
+            }
+        }
+
         viewModel.user.observe(viewLifecycleOwner) {
             Glide.with(this).load(it.picture)
                 .into(binding.ivAvatar)
@@ -49,7 +60,7 @@ class AccountDrawFragment : Fragment() {
         }
 
         if (AccountManger.isLogin()) {
-            viewModel.reqProfile(AccountManger.getPublicKey())
+//            viewModel.reqProfile(AccountManger.getPublicKey())
             viewModel.loadSelfProfile()
         }
 
