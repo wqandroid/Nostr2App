@@ -83,6 +83,9 @@ class FeedAdapter(var listData: MutableList<Feed>) :
         holder.binding.ivMore.setOnClickListener {
             clickListener?.onClick(item,it)
         }
+        holder.binding.ivAvatar.setOnClickListener {
+            clickListener?.onClick(item,it)
+        }
     }
 
 

@@ -10,7 +10,7 @@ import nostr.postr.events.MetadataEvent
 
 class LoadFollowsOfFollowsFromSingleRelay {
     companion object {
-        private val relays = arrayOf(Relay("wss://relay.damus.io", true, false))
+        private val relays = listOf(Relay("wss://relay.damus.io", true, false))
         private val pubKey = "npub1n6tkfw2ptvhlpcj8x03lu6zeytnekjqjc6k5z257q4z8z5lstjas26nls2"
         private val follows: Array<MutableSet<String>> = arrayOf(mutableSetOf(), mutableSetOf(), mutableSetOf())
         private var followsReceived = 0

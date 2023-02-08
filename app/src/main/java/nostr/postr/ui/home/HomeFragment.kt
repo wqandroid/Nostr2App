@@ -1,5 +1,6 @@
 package nostr.postr.ui.home
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,6 +18,7 @@ import nostr.postr.databinding.FragmentHomeBinding
 import nostr.postr.feed.Feed
 import nostr.postr.feed.FeedAdapter
 import nostr.postr.feed.FeedViewModel
+import nostr.postr.ui.user.UserDetailActivity
 import nostr.postr.util.MD5
 import nostr.postr.util.UIUtils.makeGone
 import nostr.postr.util.UIUtils.makeVisibility
@@ -82,6 +84,11 @@ class HomeFragment : Fragment(), FeedAdapter.ItemChildClickListener {
         if (itemView.id == R.id.iv_more) {
             Log.e("account","block${MD5.md5(feed.feedItem.content)}")
             feedViewModel.addBlock(feed.feedItem.pubkey,feed.feedItem.content)
+        }else if (itemView.id == R.id.iv_avatar){
+            startActivity(Intent(requireContext(),UserDetailActivity::class.java)
+                .apply {
+                    putExtra("pubkey",feed.feedItem.pubkey)
+                })
         }
     }
 

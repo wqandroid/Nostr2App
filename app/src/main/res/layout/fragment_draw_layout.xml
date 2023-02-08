@@ -56,6 +56,13 @@
 
         <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/mswitch"
+            app:useMaterialThemeColors="true"
+            app:enforceMaterialTheme="true"
+            app:trackTintMode="src_in"
+            app:switchMinWidth="42dp"
+            android:elevation="12dp"
+            app:thumbTint="@color/md_theme_background"
+            app:trackTint="@color/md_theme_error"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"

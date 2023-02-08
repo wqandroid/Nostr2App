@@ -6,18 +6,19 @@ import nostr.postr.*
 
 object AccountManger {
 
+    private val pKey="pri_key_2"
 
     private val mmkv = lazy {
         MMKV.defaultMMKV(1, "asd_wq")
     }
 
     fun isLogin(): Boolean {
-        return mmkv.value.decodeString("pri_key","")!!.isNotEmpty()
+        return mmkv.value.decodeString(pKey,"")!!.isNotEmpty()
     }
 
 
     fun getPublicKey(): String {
-        return Utils.pubkeyCreate(mmkv.value.decodeString("pri_key")!!.bechToBytes()).toHex()
+        return Utils.pubkeyCreate(mmkv.value.decodeString(pKey)!!.bechToBytes()).toHex()
     }
 //
 //
@@ -31,10 +32,10 @@ object AccountManger {
 //    }
 
     fun login(priKey: String) {
-        mmkv.value.encode("pri_key", priKey)
+        mmkv.value.encode(pKey, priKey)
     }
 
     fun logout() {
-        mmkv.value.encode("pri_key","")
+        mmkv.value.encode(pKey,"")
     }
 }

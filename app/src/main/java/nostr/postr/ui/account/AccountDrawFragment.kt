@@ -33,12 +33,15 @@ class AccountDrawFragment : Fragment() {
             if (AccountManger.isLogin()) {
                 AccountManger.logout()
                 binding.mbtLogin.text = "Login"
+                viewModel.user.value=null
             } else {
                 AccountManger.login("nsec1cd3c5gaymh5xvqspwvcjpcv8p0neh7arah3rv767038sua48mdds8a3svd")
                 binding.mbtLogin.text = "Logout"
 //                Log.e("account","---->${AccountManger.getPublicKey()}")
                 viewModel.reqProfile(AccountManger.getPublicKey())
                 //c3638a23a4dde8660201733120e1870be79bfba3ede2367b5e7c4f0e76a7db5b
+
+                LoginBottomDialog().show(childFragmentManager,"")
             }
         }
 
@@ -53,10 +56,14 @@ class AccountDrawFragment : Fragment() {
         }
 
         viewModel.user.observe(viewLifecycleOwner) {
-            Glide.with(this).load(it.picture)
-                .into(binding.ivAvatar)
-            binding.tvName.text = it.display_name ?: it.name
-            binding.tvDesc.text=it.about
+           if (it!=null){
+               Glide.with(this).load(it.picture)
+                   .into(binding.ivAvatar)
+               binding.tvName.text = it.display_name ?: it.name
+               binding.tvDesc.text=it.about
+           }else{
+               binding.tvName.text="未登录"
+           }
         }
 
         if (AccountManger.isLogin()) {
@@ -71,6 +78,7 @@ class AccountDrawFragment : Fragment() {
 
         if (AccountManger.isLogin()) {
             binding.mbtLogin.text = "Logout"
+            viewModel.reqProfile(AccountManger.getPublicKey())
         } else {
             binding.mbtLogin.text = "Login"
         }

@@ -11,6 +11,16 @@
     <string name="title_dashboard">Dashboard</string>
     <string name="title_activity_main2">Main2Activity</string>
 
-    <style name="menu_block_user">Block User</style>
-    
+    <string name="menu_block_user">Block User</string>
+
+    <string name="private_key">Private Key</string>
+    <string name="access">Access</string>
+    <string name="access_warning">Store your key in a safe place . If lose it , you won\'t be able to access or recover your profile .</string>
+    <string name="not_key">Don\'t hav keys?</string>
+    <string name="copy_key">Copy private key</string>
+    <string name="create_key">Create keys</string>
+
+    <string name="title_activity_user_detail">UserDetailActivity</string>
+    <string name="action_settings">Settings</string>
+
 </resources>
