@@ -28,6 +28,7 @@ class FeedAdapter(var listData: MutableList<Feed>) :
         return FeedViewHolder(binding)
     }
 
+    var clickListener: ItemChildClickListener? = null
 
     val p =
         Pattern.compile("https?:[^:<>\"]*\\/([^:<>\"]*)\\.((png!thumbnail)|(png)|(jpg)|(webp))")
@@ -42,18 +43,20 @@ class FeedAdapter(var listData: MutableList<Feed>) :
             holder.binding.ivAvatar
         )
 
-
         val m = p.matcher(item.feedItem.content)
-        if (m.find()){
-            Log.e("matches","--->${m.group()}---${item.feedItem.content}")
-            holder.binding.ivContentImg.visibility=View.VISIBLE
+        if (m.find()) {
+            Log.e("matches", "--->${m.group()}---${item.feedItem.content}")
+            holder.binding.ivContentImg.visibility = View.VISIBLE
             Glide.with(holder.binding.ivAvatar).load(m.group()).into(
                 holder.binding.ivContentImg
             )
-        }else{
-            holder.binding.ivContentImg.visibility=View.GONE
+        } else {
+            holder.binding.ivContentImg.visibility = View.GONE
         }
 
+        holder.binding.ivMore.setOnClickListener {
+            clickListener?.onClick(item,it)
+        }
     }
 
 
@@ -84,4 +87,8 @@ class FeedAdapter(var listData: MutableList<Feed>) :
     inner class FeedViewHolder(val binding: FragmentFeedItemBinding) :
         RecyclerView.ViewHolder(binding.root)
 
+
+    interface ItemChildClickListener {
+        fun onClick(feed: Feed, itemView: View)
+    }
 }

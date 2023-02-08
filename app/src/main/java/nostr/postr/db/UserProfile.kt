@@ -5,8 +5,10 @@ import androidx.room.PrimaryKey
 
 
 @Entity(tableName = "user_profile")
-class UserProfile(@PrimaryKey
-                  val pubkey:String) {
+class UserProfile(
+    @PrimaryKey
+    val pubkey: String
+) {
 
     var about: String? = null
     var banner: String? = null
@@ -17,4 +19,9 @@ class UserProfile(@PrimaryKey
     var nip05: String? = null
     var picture: String? = null
     var website: String? = null
+}
+
+@Entity(tableName = "block_user")
+class BlockUser(@PrimaryKey val pubkey: String) {
+    var contentHash: Int? = 0
 }

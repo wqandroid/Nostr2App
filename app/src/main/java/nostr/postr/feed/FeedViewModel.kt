@@ -7,15 +7,22 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
 import nostr.postr.*
+import nostr.postr.db.BlockUser
 import nostr.postr.db.NostrDB
 import nostr.postr.db.UserProfile
 import nostr.postr.events.*
 
 class FeedViewModel : ViewModel() {
+
+    private val scope = CoroutineScope(Job() + Dispatchers.IO)
+
+
+    val feedCountLiveData = MutableLiveData<Int>(0)
     val feedLiveData = MutableLiveData<List<Feed>>()
 
 
-    private val scope = CoroutineScope(Job() + Dispatchers.IO)
+    private val blockList = mutableListOf<String>()
+
 
     private var count = 0
 
@@ -44,6 +51,10 @@ class FeedViewModel : ViewModel() {
                             this.about = it.about
                             this.picture = it.picture
                             this.nip05 = it.nip05
+                            this.display_name=it.display_name
+                            this.banner=it.banner
+                            this.website=it.website
+                            this.lud16=it.lud16
                         }
                         Log.e("MetadataEvent--->", "---->${userProfile.name}")
                         scope.launch {
@@ -59,6 +70,8 @@ class FeedViewModel : ViewModel() {
 
                         val textEvent = event as TextNoteEvent
 
+                        if (blockList.contains(textEvent.pubKey.toHex()))return@launch
+
                         var feed = nostr.postr.db.FeedItem(
                             textEvent.id.toString(),
                             textEvent.pubKey.toHex(),
@@ -68,10 +81,10 @@ class FeedViewModel : ViewModel() {
                         NostrDB.getDatabase(MyApplication.getInstance())
                             .feedDao().insertFeed(feed)
                         count++
-                        if (count % 20 == 0) {
-                            loadFeedFromDB()
-                        }
-
+//                        if (count % 20 == 0) {
+//                            loadFeedFromDB()
+//                        }
+                        feedCountLiveData.postValue(count)
                         val userProfile = NostrDB.getDatabase(MyApplication._instance).profileDao()
                             .getUserInfo(feed.pubkey)
                         if (userProfile == null) {
@@ -108,6 +121,36 @@ class FeedViewModel : ViewModel() {
     }
 
 
+    fun addBlock(pubKey: String) {
+        scope.launch {
+
+            NostrDB.getDatabase(MyApplication._instance)
+                .blockUserDao().insertBlockUser(BlockUser(pubKey))
+            loadBlockUser()
+
+            //删除该用户下面的所有动态
+            NostrDB.getDatabase(MyApplication._instance)
+                .feedDao().getFeedByPublicKey(pubKey)
+                .forEach {
+                    NostrDB.getDatabase(MyApplication._instance).feedDao()
+                        .delete(it)
+                }
+
+            //重新加载 动态
+            loadFeedFromDB()
+        }
+    }
+
+    fun loadBlockUser() {
+        scope.launch {
+            blockList.clear()
+            blockList.addAll(
+                NostrDB.getDatabase(MyApplication._instance)
+                    .blockUserDao().getAllBlock().map { it.pubkey }
+            )
+        }
+    }
+
     fun reqFeed() {
 
         scope.launch {
@@ -134,14 +177,14 @@ class FeedViewModel : ViewModel() {
             val temp = mutableListOf<String>()
             temp.addAll(profileList)
             profileList.clear()
-//                Client.subscribe(clientListener)
+            Client.subscribe(clientListener)
             val filter = JsonFilter(
                 kinds = mutableListOf(0),
                 since = 1675748168,
                 limit = 20,
                 authors = temp
             )
-//                Client.connect()
+            Client.connect()
             Client.requestAndWatch(filters = mutableListOf(filter))
         }
     }
@@ -154,22 +197,28 @@ class FeedViewModel : ViewModel() {
 
             val feedList = mutableListOf<Feed>()
             list.forEach {
-                val userProfile = NostrDB.getDatabase(MyApplication._instance).profileDao()
-                    .getUserInfo(it.pubkey)
-                feedList.add(Feed(it, userProfile))
+                //拉黑的不展示
+                if (!blockList.contains(it.pubkey)) {
+                    val userProfile = NostrDB.getDatabase(MyApplication._instance).profileDao()
+                        .getUserInfo(it.pubkey)
+                    feedList.add(Feed(it, userProfile))
+                }
             }
 
             withContext(Dispatchers.Main) {
                 feedLiveData.value = feedList
+                count=0
             }
-//            list.forEach {
-//                val userProfile = NostrDB.getDatabase(MyApplication._instance).profileDao()
-//                    .getUserInfo(it.pubkey)
-//                if (userProfile == null) {
-//                    profileList.add(it.pubkey)
-//                }
-//            }
-//            reqProfile()
+
+            //req profile
+            list.forEach {
+                val userProfile = NostrDB.getDatabase(MyApplication._instance).profileDao()
+                    .getUserInfo(it.pubkey)
+                if (userProfile == null) {
+                    profileList.add(it.pubkey)
+                }
+            }
+            reqProfile()
         }
     }
 
