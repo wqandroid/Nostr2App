@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:navigationIcon="@drawable/baseline_menu_24"
-        app:navigationIconTint="@color/md_theme_onBackground"
+        app:navigationIconTint="?colorOnSurface"
         app:title="Global Feed"
         app:titleCentered="true" >
 
@@ -21,7 +21,8 @@
             android:layout_gravity="end"
             android:src="@drawable/baseline_add_24"
             android:layout_width="56dp"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            app:tint="?colorOnSurface" />
 
     </com.google.android.material.appbar.MaterialToolbar>
 

@@ -11,7 +11,7 @@ class MyApplication: Application() {
         super.onCreate()
         _instance=this
         MMKV.initialize(this)
-        DynamicColors.applyToActivitiesIfAvailable(this)
+//        DynamicColors.applyToActivitiesIfAvailable(this)
     }
 
     companion object{
