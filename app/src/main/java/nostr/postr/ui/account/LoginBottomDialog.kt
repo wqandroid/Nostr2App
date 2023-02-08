@@ -40,6 +40,7 @@ class LoginBottomDialog:BottomSheetDialogFragment() {
 
         binding.mbtAccess.setOnClickListener {
             AccountManger.login(binding.edKey.editableText.toString())
+            (requireParentFragment() as AccountDrawFragment).updateLoginStatus()
             dismiss()
         }
 

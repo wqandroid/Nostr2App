@@ -18,7 +18,11 @@ object AccountManger {
 
 
     fun getPublicKey(): String {
-        return Utils.pubkeyCreate(mmkv.value.decodeString(pKey)!!.bechToBytes()).toHex()
+        if (isLogin()){
+            return Utils.pubkeyCreate(mmkv.value.decodeString(pKey)!!.bechToBytes()).toHex()
+        }else{
+            throw  java.lang.IllegalStateException("please login")
+        }
     }
 //
 //

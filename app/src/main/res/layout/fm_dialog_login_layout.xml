@@ -36,6 +36,8 @@
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:id="@+id/ed_key"
+            android:maxLines="1"
+            android:inputType="textPassword"
             android:layout_height="wrap_content"
             android:hint="@string/private_key" />
     </com.google.android.material.textfield.TextInputLayout>

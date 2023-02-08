@@ -99,6 +99,7 @@ class AccountViewModel : ViewModel() {
                 authors = mutableListOf(pubKey))
             Client.connect()
             Client.requestAndWatch(filters = mutableListOf(filter))
+
         }
     }
 
