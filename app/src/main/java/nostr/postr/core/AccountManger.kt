@@ -24,7 +24,12 @@ object AccountManger {
             throw  java.lang.IllegalStateException("please login")
         }
     }
-//
+
+
+    fun getPrivateKey():ByteArray{
+        return mmkv.value.decodeString(pKey)!!.bechToBytes()
+    }
+
 //
 //    fun loadpubKey(){
 //        val or=Utils.pubkeyCreate(mmkv.value.decodeString("pri_key")!!.bechToBytes())

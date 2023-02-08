@@ -7,8 +7,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import nostr.postr.R
 import nostr.postr.databinding.ActivityUserDetailBinding
-import nostr.postr.feed.Feed
-import nostr.postr.feed.FeedAdapter
+import nostr.postr.ui.feed.Feed
+import nostr.postr.ui.feed.FeedAdapter
 
 class UserDetailActivity : AppCompatActivity() {
 

@@ -1,45 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_height="match_parent"
-    tools:context=".feed.FeedFragment">
+    android:orientation="vertical"
+    tools:context=".ui.feed.FeedFragment">
 
     <com.google.android.material.appbar.MaterialToolbar
-        android:layout_width="match_parent"
-        app:title="Global Feed"
-        app:titleCentered="true"
-        app:navigationIconTint="@color/md_theme_onBackground"
         android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         app:navigationIcon="@drawable/baseline_menu_24"
-        android:layout_height="wrap_content"/>
+        app:navigationIconTint="@color/md_theme_onBackground"
+        app:title="Global Feed"
+        app:titleCentered="true" >
+
+        <ImageView
+            android:id="@+id/iv_add"
+            android:layout_gravity="end"
+            android:src="@drawable/baseline_add_24"
+            android:layout_width="56dp"
+            android:layout_height="match_parent"/>
+
+    </com.google.android.material.appbar.MaterialToolbar>
 
 
     <com.google.android.material.button.MaterialButton
-        android:text="新增动态（1）点击加载"
         android:id="@+id/mbt_feed_load"
-        android:layout_margin="6dp"
-        android:layout_gravity="center_horizontal"
-        app:icon="@drawable/baseline_whatshot_24"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvFeed"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/fab_margin"
-        app:layout_anchor="@id/rvFeed"
-        app:layout_anchorGravity="bottom|end"
-        app:srcCompat="@android:drawable/ic_dialog_email" />
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="6dp"
+        android:text="新增动态（1）点击加载"
+        app:icon="@drawable/baseline_whatshot_24" />
+
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvFeed"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+<!--        <com.google.android.material.floatingactionbutton.FloatingActionButton-->
+<!--            android:id="@+id/fabAdd"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            android:layout_width="56dp"-->
+<!--            android:layout_height="56dp"-->
+<!--            android:layout_marginEnd="@dimen/fab_margin"-->
+<!--            android:layout_marginBottom="16dp"-->
+<!--            android:layout_gravity="bottom|end"-->
+<!--            app:srcCompat="@drawable/baseline_add_24" />-->
+<!--    </FrameLayout>-->
+
 
 </androidx.appcompat.widget.LinearLayoutCompat>

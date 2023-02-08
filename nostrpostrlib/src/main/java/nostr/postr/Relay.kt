@@ -119,8 +119,8 @@ class Relay(
     }
 
     fun send(signedEvent: Event) {
-        socket.send("""["EVENT",${signedEvent.toJson()}]""")
         print("ws_send_request_msg----${signedEvent.toJson()}")
+        socket.send("""["EVENT",${signedEvent.toJson()}]""")
     }
 
     fun close(subscriptionId: String) {

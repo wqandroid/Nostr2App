@@ -15,9 +15,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import nostr.postr.R
 import nostr.postr.databinding.FragmentFeedBinding
 import nostr.postr.databinding.FragmentHomeBinding
-import nostr.postr.feed.Feed
-import nostr.postr.feed.FeedAdapter
-import nostr.postr.feed.FeedViewModel
+import nostr.postr.ui.feed.Feed
+import nostr.postr.ui.feed.FeedAdapter
+import nostr.postr.ui.feed.FeedViewModel
+import nostr.postr.ui.feed.PublishActivity
 import nostr.postr.ui.user.UserDetailActivity
 import nostr.postr.util.MD5
 import nostr.postr.util.UIUtils.makeGone
@@ -76,6 +77,10 @@ class HomeFragment : Fragment(), FeedAdapter.ItemChildClickListener {
         binding.toolbar.setOnClickListener {
             requireActivity().findViewById<DrawerLayout>(R.id.drawer_layout)
                 .openDrawer(GravityCompat.START)
+        }
+
+        binding.ivAdd.setOnClickListener {
+            startActivity(Intent(requireContext(),PublishActivity::class.java))
         }
 
     }

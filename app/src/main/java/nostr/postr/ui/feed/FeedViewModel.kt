@@ -1,4 +1,4 @@
-package nostr.postr.feed
+package nostr.postr.ui.feed
 
 import android.util.Log
 import androidx.lifecycle.LiveData

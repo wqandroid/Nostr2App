@@ -1,5 +1,6 @@
 package nostr.postr.ui.account
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,6 +13,7 @@ import com.bumptech.glide.Glide
 import nostr.postr.R
 import nostr.postr.core.AccountManger
 import nostr.postr.databinding.FragmentDrawLayoutBinding
+import nostr.postr.ui.user.UserDetailActivity
 
 class AccountDrawFragment : Fragment() {
 
@@ -62,6 +64,14 @@ class AccountDrawFragment : Fragment() {
         }
 
         updateLoginStatus()
+
+        binding.ivAvatar.setOnClickListener {
+            startActivity(
+                Intent(requireContext(), UserDetailActivity::class.java)
+                .apply {
+                    putExtra("pubkey",AccountManger.getPublicKey())
+                })
+        }
     }
 
     fun updateLoginStatus() {

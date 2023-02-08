@@ -12,7 +12,7 @@ import nostr.postr.db.BlockUser
 import nostr.postr.db.NostrDB
 import nostr.postr.db.UserProfile
 import nostr.postr.events.*
-import nostr.postr.feed.Feed
+import nostr.postr.ui.feed.Feed
 import nostr.postr.util.MD5
 
 class UserViewModel : ViewModel() {
@@ -100,7 +100,7 @@ class UserViewModel : ViewModel() {
                 kinds = mutableListOf(0).apply {
                     this.add(1)
                 },
-                since=System.currentTimeMillis()/1000-3*24*3600,
+//                since=System.currentTimeMillis()/1000-3*24*3600,
                 authors = mutableListOf(pubKey)
             )
             Client.connect()
