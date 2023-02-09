@@ -1,8 +1,10 @@
 package nostr.postr.ui.user
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import fr.acinq.secp256k1.Hex
@@ -32,8 +34,7 @@ class UserDetailActivity : AppCompatActivity() {
         binding = ActivityUserDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 //        setSupportActionBar(binding.toolbar)
-
-        window.statusBarColor = getColor(R.color.md_theme_primary)
+//        window.statusBarColor = getColor(R.color.md_theme_primary)
 
         pubkey = intent.getStringExtra("pubkey")!!
 
@@ -44,15 +45,17 @@ class UserDetailActivity : AppCompatActivity() {
         binding.toolbar.title = Hex.decode(pubkey).toNpub()
         userViewModel.user.observe(this) {
 
+
             Glide.with(this).load(it.picture)
                 .into(binding.ivAvatar)
+            binding.ivAvatarBlur.isVisible = it.picture?.isNotEmpty() == true
             binding.toolbar.title = it.display_name ?: it.name
             binding.tvDesc.text = "${it.about} ${it.website} ${it.lud16}"
             if (it.nip05?.isNotEmpty() == true) {
                 binding.tvNip05.makeVisibility()
                 binding.tvNip05.text = it.nip05
             }
-            if (it.banner?.isNotEmpty()==true){
+            if (it.banner?.isNotEmpty() == true) {
 
                 Glide.with(this).load(it.banner)
                     .into(binding.ivBanner)
@@ -67,6 +70,9 @@ class UserDetailActivity : AppCompatActivity() {
         binding.rvFeed.layoutManager = LinearLayoutManager(this)
         binding.rvFeed.hasFixedSize()
 
+        userViewModel.feedLiveData.observe(this) {
+            Toast.makeText(this, "关注成功", Toast.LENGTH_SHORT).show()
+        }
 
         userViewModel.feedLiveData.observe(this) {
             list.add(it)
@@ -77,6 +83,10 @@ class UserDetailActivity : AppCompatActivity() {
         binding.toolbar.setNavigationOnClickListener {
             finish()
         }
+        binding.mbtFollow.setOnClickListener {
+            userViewModel.addFlow(pubkey)
+        }
+
 
     }
 

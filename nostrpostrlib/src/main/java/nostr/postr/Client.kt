@@ -77,6 +77,10 @@ object Client : RelayPool.Listener {
         listeners.forEach { it.onError(error, subscriptionId, relay) }
     }
 
+    override fun onOK(relay: Relay) {
+        listeners.forEach { it.onOK(relay) }
+    }
+
     override fun onRelayStateChange(type: Relay.Type, relay: Relay) {
         listeners.forEach { it.onRelayStateChange(type, relay) }
     }
@@ -111,5 +115,7 @@ object Client : RelayPool.Listener {
          * Connected to or disconnected from a relay
          */
         open fun onRelayStateChange(type: Relay.Type, relay: Relay) = Unit
+
+        open fun onOK(relay: Relay) = Unit
     }
 }

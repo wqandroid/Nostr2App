@@ -12,6 +12,9 @@ class MyApplication: Application() {
         _instance=this
         MMKV.initialize(this)
 //        DynamicColors.applyToActivitiesIfAvailable(this)
+
+        //链接所有ws
+        Client.connect()
     }
 
     companion object{

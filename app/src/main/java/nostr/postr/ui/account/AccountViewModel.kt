@@ -42,7 +42,7 @@ class AccountViewModel : ViewModel() {
             when (event.kind) {
                 MetadataEvent.kind -> {
                     val metadataEvent = event as MetadataEvent
-                    Log.e("account--->", event.toJson())
+//                    Log.e("account--->", event.toJson())
 
                     metadataEvent.contactMetaData?.let {
                         val userProfile = UserProfile(event.pubKey.toHex()).apply {
@@ -74,19 +74,19 @@ class AccountViewModel : ViewModel() {
         }
 
         override fun onError(error: Error, subscriptionId: String, relay: Relay) {
-            Log.e("ERROR", "Relay ${relay.url}: ${error.message}")
+//            Log.e("ERROR", "Relay ${relay.url}: ${error.message}")
         }
 
         override fun onRelayStateChange(type: Relay.Type, relay: Relay) {
-            Log.d(
-                "RELAY", "Relay ${relay.url} ${
-                    when (type) {
-                        Relay.Type.CONNECT -> "connected."
-                        Relay.Type.DISCONNECT -> "disconnected."
-                        Relay.Type.EOSE -> "sent all events it had stored."
-                    }
-                }"
-            )
+//            Log.d(
+//                "RELAY", "Relay ${relay.url} ${
+//                    when (type) {
+//                        Relay.Type.CONNECT -> "connected."
+//                        Relay.Type.DISCONNECT -> "disconnected."
+//                        Relay.Type.EOSE -> "sent all events it had stored."
+//                    }
+//                }"
+//            )
         }
     }
 
@@ -97,9 +97,7 @@ class AccountViewModel : ViewModel() {
             val filter = JsonFilter(
                 kinds = mutableListOf(0),
                 authors = mutableListOf(pubKey))
-            Client.connect()
             Client.requestAndWatch(filters = mutableListOf(filter))
-
         }
     }
 

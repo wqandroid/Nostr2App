@@ -7,16 +7,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
 import nostr.postr.*
+import nostr.postr.core.AccountManger
 import nostr.postr.db.BlockUser
 import nostr.postr.db.NostrDB
 import nostr.postr.db.UserProfile
 import nostr.postr.events.*
 import nostr.postr.util.MD5
+import java.util.*
 
 class FeedViewModel : ViewModel() {
 
     private val scope = CoroutineScope(Job() + Dispatchers.IO)
 
+
+    private var filterList = mutableListOf("棋牌", "S9", "广告机器人", "全球华人", "抖音快手", "Amethyst", "您的Pi")
 
     val feedCountLiveData = MutableLiveData<Int>(0)
     val feedLiveData = MutableLiveData<List<Feed>>()
@@ -28,6 +32,8 @@ class FeedViewModel : ViewModel() {
     private var count = 0
 
     private var profileList = mutableListOf<String>()
+
+    private var profileSubscriptionId: String = ""
 
     private val clientListener = object : Client.Listener() {
         override fun onNewEvent(event: Event, subscriptionId: String) {
@@ -42,6 +48,9 @@ class FeedViewModel : ViewModel() {
 //                else -> Log.d("UNHANDLED_EVENT", event.toJson())
             }
             when (event.kind) {
+                ContactListEvent.kind -> {
+                    Log.e("ContactListEvent--->", event.toJson())
+                }
                 MetadataEvent.kind -> {
                     val metadataEvent = event as MetadataEvent
 //                    Log.e("MetadataEvent--->", event.toJson())
@@ -57,21 +66,31 @@ class FeedViewModel : ViewModel() {
                             this.website = it.website
                             this.lud16 = it.lud16
                         }
-                        Log.e("MetadataEvent--->", "---->${userProfile.name}")
+//                        Log.e("MetadataEvent--->", "---->${userProfile.name}")
                         scope.launch {
                             NostrDB.getDatabase(MyApplication.getInstance())
                                 .profileDao().insertUser(userProfile)
                         }
                     }
+                    if (profileSubscriptionId == subscriptionId) {
+                        Client.close(subscriptionId)
+                    }
 
                 }
                 TextNoteEvent.kind -> {
 
+                    val textEvent = event as TextNoteEvent
+
+                    if (blockList.contains(textEvent.pubKey.toHex()) || blockContentList.contains(
+                            MD5.md5(textEvent.content)
+                        )
+                    ) return
+
+                    if (filterList.any { textEvent.content.contains(it) }) {
+                        Log.e("block", "拦截---->${textEvent.content}")
+                        return
+                    }
                     scope.launch {
-
-                        val textEvent = event as TextNoteEvent
-
-                        if (blockList.contains(textEvent.pubKey.toHex()) || blockContentList.contains(MD5.md5(textEvent.content))) return@launch
 
                         var feed = nostr.postr.db.FeedItem(
                             textEvent.id.toString(),
@@ -90,7 +109,7 @@ class FeedViewModel : ViewModel() {
                             .getUserInfo(feed.pubkey)
                         if (userProfile == null) {
                             profileList.add(feed.pubkey)
-                            if (profileList.size >= 20) {
+                            if (profileList.size >= 40) {
                                 reqProfile()
                             }
                         }
@@ -105,7 +124,7 @@ class FeedViewModel : ViewModel() {
         }
 
         override fun onError(error: Error, subscriptionId: String, relay: Relay) {
-            Log.e("ERROR", "Relay ${relay.url}: ${error.message}")
+//            Log.e("ERROR", "Relay ${relay.url}: ${error.message}")
         }
 
         override fun onRelayStateChange(type: Relay.Type, relay: Relay) {
@@ -141,7 +160,6 @@ class FeedViewModel : ViewModel() {
                     NostrDB.getDatabase(MyApplication._instance).feedDao()
                         .delete(it)
                 }
-
             //重新加载 动态
             loadFeedFromDB()
         }
@@ -158,7 +176,7 @@ class FeedViewModel : ViewModel() {
                 list.map { it.pubkey }
             )
             list.forEach {
-                if (it.contentMD5.isNullOrEmpty()){
+                if (it.contentMD5.isNullOrEmpty()) {
                     blockContentList.add(it.contentMD5!!)
                 }
             }
@@ -175,19 +193,28 @@ class FeedViewModel : ViewModel() {
 
             Client.subscribe(clientListener)
 
-            val filter = JsonFilter(
-                since = sinceTime,
-                limit = 20,
-            )
-            Client.connect()
-            Client.requestAndWatch(filters = mutableListOf(filter))
+//            val filter = JsonFilter(
+//                since = sinceTime,
+//                kinds = mutableListOf(1, 2),
+//                limit = 20,
+//            )
+//
+//            Client.reqSend(filters = mutableListOf(filter))
 
+            Client.requestAndWatch(
+                filters = mutableListOf(
+                    JsonFilter(
+                        kinds = listOf(ContactListEvent.kind),
+                        authors = listOf(AccountManger.getPublicKey())
+                    )
+                )
+            )
         }
 
 
     }
 
-    fun stopSubFeed(){
+    fun stopSubFeed() {
         Client.unsubscribe(listener = clientListener)
     }
 
@@ -203,8 +230,11 @@ class FeedViewModel : ViewModel() {
                 limit = 20,
                 authors = temp
             )
-            Client.connect()
-            Client.requestAndWatch(filters = mutableListOf(filter))
+            profileSubscriptionId = "profile_${UUID.randomUUID().toString().substring(0..5)}"
+            Client.requestAndWatch(
+                subscriptionId = profileSubscriptionId,
+                filters = mutableListOf(filter)
+            )
         }
     }
 
@@ -230,14 +260,14 @@ class FeedViewModel : ViewModel() {
             }
 
             //req profile
-            list.forEach {
-                val userProfile = NostrDB.getDatabase(MyApplication._instance).profileDao()
-                    .getUserInfo(it.pubkey)
-                if (userProfile == null) {
-                    profileList.add(it.pubkey)
-                }
-            }
-            reqProfile()
+//            list.forEach {
+//                val userProfile = NostrDB.getDatabase(MyApplication._instance).profileDao()
+//                    .getUserInfo(it.pubkey)
+//                if (userProfile == null) {
+//                    profileList.add(it.pubkey)
+//                }
+//            }
+//            reqProfile()
         }
     }
 

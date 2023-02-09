@@ -55,6 +55,11 @@ class Relay(
                                 Error("Relay sent notice: $channel")
                             )
                         }
+                        "OK"->{
+                            //["OK","c7e8b544ee03b2237f04af7978f3b3897fbcbf81cd30b6175459221ef288cd71",true,""]
+                            println("OK--->${msg}")
+                           listeners.forEach { it.onOK(this@Relay) }
+                        }
                         else -> listeners.forEach {
                             it.onError(
                                 this@Relay,
@@ -115,11 +120,13 @@ class Relay(
         }
         val request = """["REQ","$requestId",${filters.joinToString(",") { it.toJson() }}]"""
         print("ws_send_request_msg----$request")
+        println()
         socket.send(request)
     }
 
     fun send(signedEvent: Event) {
-        print("ws_send_request_msg----${signedEvent.toJson()}")
+        println("ws_send_request_msg----${signedEvent.toJson()}")
+        println()
         socket.send("""["EVENT",${signedEvent.toJson()}]""")
     }
 
@@ -152,5 +159,6 @@ class Relay(
          * @param type is 0 for disconnect and 1 for connect
          */
         fun onRelayStateChange(relay: Relay, type: Type)
+        fun onOK(relay: Relay)
     }
 }

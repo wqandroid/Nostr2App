@@ -71,6 +71,7 @@ object RelayPool: Relay.Listener {
 
         fun onError(error: Error, subscriptionId: String, relay: Relay)
 
+        fun onOK(relay: Relay)
         fun onRelayStateChange(type: Relay.Type, relay: Relay)
     }
 
@@ -90,6 +91,10 @@ object RelayPool: Relay.Listener {
 
     override fun onRelayStateChange(relay: Relay, type: Relay.Type) {
         listeners.forEach { it.onRelayStateChange(type, relay) }
+    }
+
+    override fun onOK(relay: Relay) {
+        listeners.forEach{it.onOK(relay)}
     }
 
 }

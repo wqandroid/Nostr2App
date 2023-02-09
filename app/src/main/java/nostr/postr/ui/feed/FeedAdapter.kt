@@ -71,7 +71,7 @@ class FeedAdapter(var listData: MutableList<Feed>) :
 
         val m = p.matcher(item.feedItem.content)
         if (m.find()) {
-            Log.e("matches", "--->${m.group()}---${item.feedItem.content}")
+//            Log.e("matches", "--->${m.group()}---${item.feedItem.content}")
             holder.binding.ivContentImg.visibility = View.VISIBLE
             Glide.with(holder.binding.ivAvatar).load(m.group()).into(
                 holder.binding.ivContentImg

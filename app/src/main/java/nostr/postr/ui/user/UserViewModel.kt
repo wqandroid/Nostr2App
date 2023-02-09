@@ -19,19 +19,26 @@ class UserViewModel : ViewModel() {
 
     private val scope = CoroutineScope(Job() + Dispatchers.IO)
 
-    lateinit var pubKey:String
+    lateinit var pubKey: String
 
     val user = MutableLiveData<UserProfile>()
     val feedLiveData = MutableLiveData<Feed>()
+    val flowResult=MutableLiveData(false)
 
 
     private val clientListener = object : Client.Listener() {
+
+        override fun onOK(relay: Relay) {
+            super.onOK(relay)
+            flowResult.postValue(true)
+        }
+
         override fun onNewEvent(event: Event, subscriptionId: String) {
             when (event.kind) {
                 MetadataEvent.kind -> {
                     val metadataEvent = event as MetadataEvent
-                    Log.e("account--->", event.toJson())
-                    if (pubKey!=event.pubKey.toHex())return
+//                    Log.e("account--->", event.toJson())
+                    if (pubKey != event.pubKey.toHex()) return
                     metadataEvent.contactMetaData?.let {
                         val userProfile = UserProfile(event.pubKey.toHex()).apply {
                             this.name = it.name
@@ -54,7 +61,7 @@ class UserViewModel : ViewModel() {
                 TextNoteEvent.kind -> {
                     val textEvent = event as TextNoteEvent
 
-                    if (pubKey!=event.pubKey.toHex())return
+                    if (pubKey != event.pubKey.toHex()) return
 
                     var feed = nostr.postr.db.FeedItem(
                         textEvent.id.toString(),
@@ -62,7 +69,7 @@ class UserViewModel : ViewModel() {
                         textEvent.createdAt,
                         textEvent.content
                     )
-                    feedLiveData.postValue(Feed(feed,user.value))
+                    feedLiveData.postValue(Feed(feed, user.value))
                 }
                 RecommendRelayEvent.kind -> {
                     Log.d("RecommendRelayEvent--->", event.toJson())
@@ -103,11 +110,25 @@ class UserViewModel : ViewModel() {
 //                since=System.currentTimeMillis()/1000-3*24*3600,
                 authors = mutableListOf(pubKey)
             )
-            Client.connect()
-            Client.requestAndWatch(filters = mutableListOf(filter))
+//            Client.reqSend(filters = mutableListOf(filter))
         }
     }
 
+
+    fun addFlow(pubKey: String) {
+
+        val list = mutableListOf<Contact>()
+        list.add(Contact(pubKeyHex = pubKey, relayUri = null))
+
+        val relayUser = mutableMapOf<String, ContactListEvent.ReadWrite>()
+        Constants.defaultRelays.filter {
+            it.enable
+        }.forEach {
+            relayUser[it.url]=ContactListEvent.ReadWrite(it.read, it.write)
+        }
+        val event = ContactListEvent.create(list, relayUser, privateKey = AccountManger.getPrivateKey())
+        Client.send(event)
+    }
 
     override fun onCleared() {
         super.onCleared()

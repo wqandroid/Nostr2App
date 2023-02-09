@@ -44,11 +44,12 @@ class AccountDrawFragment : Fragment() {
             }
         }
 
-        binding.mswitch.setOnClickListener {
+        binding.ivDay.setOnClickListener {
             if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-//                AppConfig.getInstance().saveNightModel(AppCompatDelegate.MODE_NIGHT_NO)
+                binding.ivDay.setImageResource(R.drawable.baseline_mode_night_24)
             } else {
+                binding.ivDay.setImageResource(R.drawable.baseline_light_mode_24)
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
 //                AppConfig.getInstance().saveNightModel(AppCompatDelegate.MODE_NIGHT_YES)
             }
