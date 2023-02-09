@@ -110,7 +110,7 @@ class UserViewModel : ViewModel() {
 //                since=System.currentTimeMillis()/1000-3*24*3600,
                 authors = mutableListOf(pubKey)
             )
-//            Client.reqSend(filters = mutableListOf(filter))
+            Client.requestAndWatch(filters = mutableListOf(filter))
         }
     }
 
