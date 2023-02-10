@@ -36,7 +36,7 @@ class HomeFragment : Fragment(), FeedAdapter.ItemChildClickListener {
         savedInstanceState: Bundle?
     ): View {
         feedViewModel =
-            ViewModelProvider(this)[FeedViewModel::class.java]
+            ViewModelProvider(requireActivity())[FeedViewModel::class.java]
         binding = FragmentFeedBinding.inflate(inflater, container, false)
 
         return binding.root
@@ -55,7 +55,7 @@ class HomeFragment : Fragment(), FeedAdapter.ItemChildClickListener {
             adapter.updateData(it)
         }
         feedViewModel.loadBlockUser()
-        feedViewModel.loadFeedFromDB()
+//        feedViewModel.loadFeedFromDB()
 
         adapter.clickListener = this
 
@@ -83,6 +83,7 @@ class HomeFragment : Fragment(), FeedAdapter.ItemChildClickListener {
             startActivity(Intent(requireContext(),PublishActivity::class.java))
         }
 
+        feedViewModel.reqMainUserInfo()
     }
 
     override fun onClick(feed: Feed, itemView: View) {

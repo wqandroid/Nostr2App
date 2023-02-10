@@ -1,24 +1,17 @@
 package nostr.postr.ui.feed
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.RelativeLayout
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import fr.acinq.secp256k1.Hex
-import nostr.postr.R
-import nostr.postr.Utils
-import nostr.postr.bechToBytes
 import nostr.postr.databinding.FragmentFeedItemBinding
 import nostr.postr.db.FeedItem
 import nostr.postr.db.UserProfile
 import nostr.postr.toNpub
 import nostr.postr.util.UIUtils.makeGone
 import nostr.postr.util.UIUtils.makeVisibility
-import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 data class Feed(val feedItem: FeedItem, val userProfile: UserProfile?)

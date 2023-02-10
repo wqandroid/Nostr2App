@@ -18,7 +18,7 @@ abstract class NostrDB : RoomDatabase() {
         private var appDatabase: NostrDB? = null
         fun getDatabase(context: Context): NostrDB {
             if (appDatabase == null) {
-                appDatabase = Room.databaseBuilder(context, NostrDB::class.java, "nor4.db")
+                appDatabase = Room.databaseBuilder(context, NostrDB::class.java, "nor7.db")
                     .fallbackToDestructiveMigration()
                     .allowMainThreadQueries()
                     .build()
@@ -38,7 +38,7 @@ interface FeedDao {
     @Query("SELECT * FROM feed_info ORDER BY created_at DESC LIMIT 1")
     suspend fun getLast(): FeedItem?
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFeed(feed: FeedItem)
 
     @Query("SELECT COUNT(*)  FROM feed_info ")

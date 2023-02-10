@@ -21,7 +21,7 @@ object Client : RelayPool.Listener {
      **/
     var lenient: Boolean = false
     private val listeners = HashSet<Listener>()
-    internal var relays = Constants.defaultRelays
+    internal var relays = Constants.defaultRelays.filter { it.enable }
     internal val subscriptions: MutableMap<String, MutableList<JsonFilter>> = mutableMapOf()
 
 

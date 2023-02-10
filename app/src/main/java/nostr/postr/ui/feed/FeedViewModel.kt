@@ -12,6 +12,7 @@ import nostr.postr.db.BlockUser
 import nostr.postr.db.NostrDB
 import nostr.postr.db.UserProfile
 import nostr.postr.events.*
+import nostr.postr.ui.dashboard.FollowInfo
 import nostr.postr.util.MD5
 import java.util.*
 
@@ -25,15 +26,18 @@ class FeedViewModel : ViewModel() {
     val feedCountLiveData = MutableLiveData<Int>(0)
     val feedLiveData = MutableLiveData<List<Feed>>()
 
+    val followList = MutableLiveData<List<FollowInfo>>()
 
     private val blockList = mutableListOf<String>()
     private val blockContentList = mutableListOf<String>()
 
     private var count = 0
-
     private var profileList = mutableListOf<String>()
 
+    private var followSet = mutableSetOf<FollowInfo>()
+
     private var profileSubscriptionId: String = ""
+    private val mainSubscriptionId = "mainUser_${UUID.randomUUID().toString().substring(0..5)}"
 
     private val clientListener = object : Client.Listener() {
         override fun onNewEvent(event: Event, subscriptionId: String) {
@@ -49,7 +53,35 @@ class FeedViewModel : ViewModel() {
             }
             when (event.kind) {
                 ContactListEvent.kind -> {
-                    Log.e("ContactListEvent--->", event.toJson())
+                    val event = event as ContactListEvent
+                    Log.e(
+                        "ContactListEvent--->",
+                        "${subscriptionId}-->\n${Thread.currentThread().name}\n--->$event"
+                    )
+//                    if (subscriptionId == mainSubscriptionId) {
+                    scope.launch {
+                        event.follows.forEach {
+
+                            val profile =
+                                NostrDB.getDatabase(MyApplication._instance).profileDao()
+                                    .getUserInfo(it.pubKeyHex)
+
+                            followSet.add(
+                                FollowInfo(
+                                    it.pubKeyHex,
+                                    it.relayUri,
+                                    profile
+                                )
+                            )
+                            followList.postValue(followSet.toList())
+                            if (profile == null) {
+                                reqProfile(listOf(it.pubKeyHex))
+                            }
+
+                        }
+                        reqFollowFeed(event.follows.map { it.pubKeyHex })
+                    }
+
                 }
                 MetadataEvent.kind -> {
                     val metadataEvent = event as MetadataEvent
@@ -72,10 +104,6 @@ class FeedViewModel : ViewModel() {
                                 .profileDao().insertUser(userProfile)
                         }
                     }
-                    if (profileSubscriptionId == subscriptionId) {
-                        Client.close(subscriptionId)
-                    }
-
                 }
                 TextNoteEvent.kind -> {
 
@@ -110,7 +138,8 @@ class FeedViewModel : ViewModel() {
                         if (userProfile == null) {
                             profileList.add(feed.pubkey)
                             if (profileList.size >= 40) {
-                                reqProfile()
+                                reqProfile(profileList)
+                                profileList.clear()
                             }
                         }
 
@@ -201,34 +230,71 @@ class FeedViewModel : ViewModel() {
 //
 //            Client.reqSend(filters = mutableListOf(filter))
 
-            Client.requestAndWatch(
-                filters = mutableListOf(
-                    JsonFilter(
-                        kinds = listOf(ContactListEvent.kind),
-                        authors = listOf(AccountManger.getPublicKey())
-                    )
-                )
-            )
+//            Client.requestAndWatch(
+//                filters = mutableListOf(
+//                    JsonFilter(
+//                        kinds = listOf(ContactListEvent.kind),
+//                        authors = listOf(AccountManger.getPublicKey())
+//                    )
+//                )
+//            )
         }
 
 
     }
 
+    fun reqFollowFeed(list: List<String>) {
+
+        val map = mutableMapOf<String, List<String>>()
+        map["p"] = list
+        Client.requestAndWatch(
+            filters = mutableListOf(
+                JsonFilter(
+                    kinds = listOf(TextNoteEvent.kind),
+                    tags = map,
+                    limit = 200
+                )
+            )
+        )
+    }
+
+
+    fun reqMainUserInfo() {
+        //    ["REQ","mainUser 8563",{"#p":["9e9764b9415b2ff0e24733e3fe685922e79b4812c6ad412a9e05447153f05cbb"],"kinds":[1,3,4],"limit":5000},{"authors":["9e9764b9415b2ff0e24733e3fe685922e79b4812c6ad412a9e05447153f05cbb"],"kinds":[0,1,2,3,4]}]
+
+        if (!AccountManger.isLogin()) return
+        Client.subscribe(clientListener)
+        val pubKey = AccountManger.getPublicKey()
+        val map = mutableMapOf<String, List<String>>()
+            .apply {
+                this["p"] = listOf(pubKey)
+            }
+        val filter = mutableListOf(
+            JsonFilter(
+                kinds = mutableListOf(1, 3, 4),
+                tags = map
+            ),
+            JsonFilter(
+                kinds = mutableListOf(0, 1, 2, 3, 4),
+                authors = listOf(AccountManger.getPublicKey()),
+            )
+        )
+        Client.requestAndWatch(subscriptionId = mainSubscriptionId, filters = filter)
+    }
+
+
     fun stopSubFeed() {
         Client.unsubscribe(listener = clientListener)
     }
 
-    fun reqProfile() {
+    fun reqProfile(list: List<String>) {
         scope.launch {
-            val temp = mutableListOf<String>()
-            temp.addAll(profileList)
-            profileList.clear()
             Client.subscribe(clientListener)
             val filter = JsonFilter(
                 kinds = mutableListOf(0),
                 since = 1675748168,
                 limit = 20,
-                authors = temp
+                authors = list
             )
             profileSubscriptionId = "profile_${UUID.randomUUID().toString().substring(0..5)}"
             Client.requestAndWatch(
@@ -240,6 +306,7 @@ class FeedViewModel : ViewModel() {
 
 
     fun loadFeedFromDB() {
+
         scope.launch {
             val list = NostrDB.getDatabase(MyApplication._instance)
                 .feedDao().getAll()
@@ -254,8 +321,10 @@ class FeedViewModel : ViewModel() {
                 }
             }
 
+
             withContext(Dispatchers.Main) {
                 feedLiveData.value = feedList
+                feedCountLiveData.value = 0
                 count = 0
             }
 

@@ -23,7 +23,7 @@ class ContactListEvent(
     init {
         try {
             follows = tags.filter { it[0] == "p" }.map {
-                Contact(it[1], it.getOrNull(2))
+                Contact(it[1], it.getOrNull(3))
             }
         } catch (e: Exception) {
             throw Error("can't parse tags as follows: $tags", e)
@@ -60,4 +60,10 @@ class ContactListEvent(
     }
 
     data class ReadWrite(val read: Boolean, val write: Boolean)
+
+    override fun toString(): String {
+        return "ContactListEvent(follows=$follows, relayUse=$relayUse)"
+    }
+
+
 }
