@@ -3,6 +3,7 @@ package nostr.postr.ui.feed
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import fr.acinq.secp256k1.Hex
@@ -38,32 +39,23 @@ class FeedAdapter(var listData: MutableList<Feed>) :
         val item: Feed = listData[position]
         holder.binding.tvContent.text = item.feedItem.content
         holder.binding.tvTime.text = parseTime(item.feedItem.created_at)
-        holder.binding.tvName.text =
-            item.userProfile?.display_name ?: item.userProfile?.name ?: item.feedItem.pubkey
 
-        if (item.replyTos.isNullOrEmpty()){
+        if (item.replyTos.isNullOrEmpty()) {
             holder.binding.tvReply.makeGone()
-        }else{
-            holder.binding.tvReply.makeVisibility()
-            holder.binding.tvReply.text="@reply${item.replyTos!![0]}"
-        }
-
-        if (item.userProfile == null || item.userProfile.name.isNullOrEmpty()) {
-            holder.binding.tvName.text = Hex.decode(item.feedItem.pubkey).toNpub()
-            holder.binding.tvNip05.makeGone()
         } else {
-//            holder.binding.tvDesc.makeVisibility()
-//            holder.binding.tvDesc.text = Hex.decode(item.feedItem.pubkey).toNpub()
-            holder.binding.tvName.text = item.userProfile.display_name ?: item.userProfile.name
-            if (item.userProfile.nip05?.isNotEmpty() == true) {
-                holder.binding.tvNip05.makeVisibility()
-                holder.binding.tvNip05.text = item.userProfile.nip05
-            } else {
-                holder.binding.tvNip05.makeGone()
-            }
+            holder.binding.tvReply.makeVisibility()
+            holder.binding.tvReply.text = "@reply${item.replyTos!![0]}"
         }
 
-
+        if (item.userProfile == null) {
+            holder.binding.ivLn6.isVisible = false
+            holder.binding.tvName.text = ""
+            holder.binding.tvDisplayName.text = Hex.decode(item.feedItem.pubkey).toNpub()
+        } else {
+            holder.binding.tvDisplayName.text = item.userProfile.display_name
+            holder.binding.tvName.text = "@${item.userProfile.name}"
+            holder.binding.ivLn6.isVisible = item.userProfile.lud16?.isNotEmpty() == true
+        }
 
 
         Glide.with(holder.binding.ivAvatar).load(item.userProfile?.picture).into(

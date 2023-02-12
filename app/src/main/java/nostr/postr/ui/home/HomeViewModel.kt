@@ -24,6 +24,7 @@ class HomeViewModel : WsViewModel() {
 
     private val mainSubscriptionId = "mainUser_${UUID.randomUUID().toString().substring(0..5)}"
 
+    private val followSubscriptionId="follow_feed${UUID.randomUUID().toString().substring(0..5)}"
 
     val feedCountLiveData = MutableLiveData<Int>(0)
     val feedLiveData = MutableLiveData<List<Feed>>()
@@ -31,6 +32,8 @@ class HomeViewModel : WsViewModel() {
 
     private var count = 0
     private var profileList = mutableListOf<String>()
+
+    private val setIds= mutableSetOf<String>()
 
     override fun onRecPrivateDmEvent(subscriptionId: String, event: PrivateDmEvent) {
         super.onRecPrivateDmEvent(subscriptionId, event)
@@ -70,6 +73,8 @@ class HomeViewModel : WsViewModel() {
         super.onRecContactListEvent(subscriptionId, event)
         if (subscriptionId != mainSubscriptionId) return
         scope.launch {
+
+            Log.e("onRecContactListEvent--->", event.toJson())
             event.follows.forEach {
                 NostrDB.getDatabase(MyApplication._instance)
                     .followUserKeyDao()
@@ -78,9 +83,11 @@ class HomeViewModel : WsViewModel() {
                     })
             }
 
-            event.follows.map { it.pubKeyHex }.also {
-                AccountManger.follows=it.toMutableList()
-                reqFollowFeed(it)
+            event.follows.map { it.pubKeyHex }.also { stringList ->
+                stringList.toMutableList().also {
+                    AccountManger.follows=it
+                    reqFollowFeed(it)
+                }
             }
         }
     }
@@ -111,13 +118,12 @@ class HomeViewModel : WsViewModel() {
 
     }
 
-    override fun onRecTextNoteEvent(subscriptionId: String, event: TextNoteEvent) {
-        super.onRecTextNoteEvent(subscriptionId, event)
+    override fun onRecTextNoteEvent(subscriptionId: String, textEvent: TextNoteEvent) {
+        super.onRecTextNoteEvent(subscriptionId, textEvent)
 //        if (!followSet.map { it.pubkey }.contains(textEvent.pubKey.toHex())){
 //                        Log.e("no_follow", "拦截---->${textEvent.content}")
 //                        return
 //                    }
-        val textEvent = event as TextNoteEvent
 //                    if (subscriptionId != mainSubscriptionId) return
         scope.launch {
 
@@ -126,7 +132,10 @@ class HomeViewModel : WsViewModel() {
 //                            )
 //                        ) return@launch
 
-            if (!textEvent.isFeed() || subscriptionId != mainSubscriptionId) return@launch
+            if (!textEvent.isFeed() || subscriptionId != followSubscriptionId) return@launch
+
+            if (setIds.contains(textEvent.id.toHex()))return@launch
+            setIds.add(textEvent.id.toHex())
             var feed = nostr.postr.db.FeedItem(
                 textEvent.id.toString(),
                 textEvent.pubKey.toHex(),
@@ -139,7 +148,7 @@ class HomeViewModel : WsViewModel() {
 //                        if (count % 20 == 0) {
 //                            loadFeedFromDB()
 //                        }
-            Log.e("TextNoteEvent--->$count", event.toJson())
+            Log.e("TextNoteEvent--->$count", textEvent.toJson())
 
             withContext(Dispatchers.Main) {
                 feedCountLiveData.value = count
@@ -190,10 +199,12 @@ class HomeViewModel : WsViewModel() {
         wsClient.value.requestAndWatch(subscriptionId = mainSubscriptionId, filters = filter)
     }
 
-    private fun reqFollowFeed(list: List<String>) {
-        val map = mutableMapOf<String, List<String>>()
+    private fun reqFollowFeed(list: MutableList<String>) {
+//        val map = mutableMapOf<String, List<String>>()
 //        map["p"] = list
+        list.add(AccountManger.getPublicKey())
         wsClient.value.requestAndWatch(
+            followSubscriptionId,
             filters = mutableListOf(
                 JsonFilter(
                     kinds = listOf(TextNoteEvent.kind),

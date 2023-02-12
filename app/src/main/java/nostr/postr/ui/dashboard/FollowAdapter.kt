@@ -52,13 +52,6 @@ class FollowAdapter(var listData: MutableList<FollowInfo>) :
             if (item.userProfile == null) item.name ?: item.pubkey else item.userProfile?.bestName()
 
 
-        if (item.userProfile?.nip05?.isNotEmpty() == true) {
-            holder.binding.tvNip05.makeVisibility()
-            holder.binding.tvNip05.text = item.userProfile?.nip05
-        } else {
-            holder.binding.tvNip05.makeGone()
-        }
-
         Glide.with(holder.binding.ivAvatar).load(item.userProfile?.picture).into(
             holder.binding.ivAvatar
         )

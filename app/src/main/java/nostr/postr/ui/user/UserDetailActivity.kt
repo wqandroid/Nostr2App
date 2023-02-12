@@ -14,6 +14,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import nostr.postr.MyApplication
 import nostr.postr.R
+import nostr.postr.bechToBytes
 import nostr.postr.core.AccountManger
 import nostr.postr.core.BaseAct
 import nostr.postr.databinding.ActivityUserDetailBinding
@@ -52,7 +53,7 @@ class UserDetailActivity : BaseAct() {
         pubkey = intent.getStringExtra("pubkey")!!
 
         userViewModel.pubKey = pubkey
-
+        binding.toolbar.title=pubkey
         userViewModel.reqProfile(pubkey)
         binding.toolbar.title = Hex.decode(pubkey).toNpub()
         userViewModel.user.observe(this) {
@@ -143,7 +144,13 @@ class UserDetailActivity : BaseAct() {
     private fun showUser(it: UserProfile) {
         Glide.with(this).load(it.picture)
             .into(binding.ivAvatar)
-        binding.toolbar.title = it.bestName()
+
+        it.display_name?.let {
+            binding.toolbar.title = it
+        }
+        it.name?.let {
+            binding.toolbar.subtitle="@$it"
+        }
         if (!it.about.isNullOrEmpty()) {
             binding.tvDesc.makeVisibility()
             binding.tvDesc.text = "${it.about} ${it.website}"
@@ -160,7 +167,8 @@ class UserDetailActivity : BaseAct() {
             Glide.with(this).load(it)
                 .into(binding.ivBanner)
         }
-
+        binding.llContent.requestLayout()
+        binding.llContent.invalidate()
     }
 
 

@@ -72,7 +72,7 @@ class UserViewModel : WsViewModel() {
         super.onRecTextNoteEvent(subscriptionId, event)
         if (subID != subscriptionId) return
         if (!idSet.contains(event.id.toHex())) {
-//            Log.e("textEvent--->${event.id.toHex()}", event.toJson())
+            Log.e("textEvent--->${event.id.toHex()}", event.toJson())
             idSet.add(event.id.toHex())
             var feed = nostr.postr.db.FeedItem(
                 event.id.toString(),

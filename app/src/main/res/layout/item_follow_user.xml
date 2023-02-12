@@ -6,7 +6,6 @@
     android:layout_height="wrap_content">
 
 
-
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -39,22 +38,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
-               <TextView
-                   style="@style/TextAppearance.Material3.BodySmall"
-                   android:paddingLeft="3dp"
-                   android:drawablePadding="2dp"
-                   android:visibility="gone"
-                   android:drawableStart="@drawable/svg_nip05_auth"
-                   app:layout_constraintBottom_toBottomOf="@id/tv_name"
-                   app:layout_constraintTop_toTopOf="@id/tv_name"
-                   app:layout_constraintStart_toEndOf="@id/tv_name"
-                   android:text="sddssdddsssss@ss"
-                   android:id="@+id/tv_nip05"
-                   android:lines="1"
-                   android:maxWidth="120dp"
-                   android:ellipsize="middle"
-                   android:layout_width="wrap_content"
-                   android:layout_height="wrap_content"/>
 
 
 

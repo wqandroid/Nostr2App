@@ -35,6 +35,11 @@ class Relay(
 
     fun unregister(listener: Client.Listener) = listeners.remove(listener)
 
+    fun connection() {
+
+    }
+
+
     fun requestAndWatch(
         subscriptionId: String,
         reconnectTs: Long? = null,
@@ -51,7 +56,6 @@ class Relay(
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
-
                 synchronized(listeners) {
                     parseMessage(text, subscriptionId)
                 }
@@ -59,7 +63,39 @@ class Relay(
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
                 listeners.forEach { it.onRelayStateChange(Type.DISCONNECT, this@Relay) }
+            }
 
+            override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                synchronized(listeners) {
+                    listeners.forEach {
+                        it.onError(Error("WebSocket Failure", t), subscriptionId, this@Relay)
+                    }
+                }
+            }
+        }
+        socket = httpClient.newWebSocket(request, listener)
+    }
+
+    fun justConnection() {
+        val request = Request.Builder().url(url)
+            .build()
+        val listener = object : WebSocketListener() {
+
+            override fun onOpen(webSocket: WebSocket, response: Response) {
+                listeners.forEach { it.onRelayStateChange(Type.CONNECT, this@Relay) }
+            }
+
+            override fun onMessage(webSocket: WebSocket, text: String) {
+                synchronized(listeners) {
+                    val msg = Event.gson.fromJson(text, JsonElement::class.java).asJsonArray
+                    val type = msg[0].asString
+                    val channel = msg[1].asString
+                    parseMessage(text, channel)
+                }
+            }
+
+            override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+                listeners.forEach { it.onRelayStateChange(Type.DISCONNECT, this@Relay) }
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
@@ -71,9 +107,7 @@ class Relay(
             }
         }
         socket = httpClient.newWebSocket(request, listener)
-
     }
-
 
     private fun parseMessage(text: String, subscriptionId: String) {
         try {
@@ -81,7 +115,6 @@ class Relay(
             val msg = Event.gson.fromJson(text, JsonElement::class.java).asJsonArray
             val type = msg[0].asString
             val channel = msg[1].asString
-
 
             when (type) {
                 "EVENT" -> {
@@ -163,9 +196,9 @@ class Relay(
     }
 
     fun send(signedEvent: Event) {
-        println("ws_send_request_msg----${signedEvent.toJson()}")
+        socket?.send("""["EVENT",${signedEvent.toJson()}]""")
+        println("${socket}-->ws_send_request_msg----${signedEvent.toJson()}")
         println()
-        socket.send("""["EVENT",${signedEvent.toJson()}]""")
     }
 
     fun close(subscriptionId: String) {

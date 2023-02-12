@@ -52,7 +52,7 @@
                     android:layout_height="wrap_content"
                     android:background="?colorSurface"
                     android:orientation="vertical"
-                    android:minHeight="86dp"
+                    android:minHeight="96dp"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
                     app:layout_constraintBottom_toBottomOf="parent">
@@ -91,22 +91,23 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:lines="2"
+                        android:lines="1"
                         android:ellipsize="end"
                         android:textColor="@color/md_theme_primary"
                         android:textSize="12sp"
                         android:visibility="gone"
                         app:drawableStartCompat="@drawable/baseline_electric_bolt_24"
-                        app:drawableTint="@color/md_theme_tertiary" />
+                        app:drawableTint="@color/electric_color" />
 
 
                     <TextView
                         android:id="@+id/tv_desc"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text=""
-                        android:visibility="gone" />
+                        android:minLines="2"
+                        android:visibility="visible" />
 
 
                 </androidx.appcompat.widget.LinearLayoutCompat>
@@ -145,14 +146,14 @@
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="?actionBarSize"
                 app:collapseIcon="@drawable/baseline_arrow_back_24"
                 app:contentInsetStart="1dp"
                 app:titleTextColor="@color/md_theme_onSurface"
                 app:layout_collapseMode="pin"
                 app:navigationIcon="@drawable/baseline_arrow_back_24"
                 app:popupTheme="@style/Theme.DrawDemo.PopupOverlay"
-                app:title="">
+                >
 
                 <ImageView
                     android:layout_width="56dp"

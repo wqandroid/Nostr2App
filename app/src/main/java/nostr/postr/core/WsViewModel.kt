@@ -10,6 +10,12 @@ import java.util.*
 abstract class WsViewModel : ViewModel() {
 
     private val clientListener = object : Client.Listener() {
+
+        override fun onOK(relay: Relay) {
+            super.onOK(relay)
+            onOk(relay)
+        }
+
         override fun onEvent(event: Event, subscriptionId: String, relay: Relay) {
             when (event.kind) {
                 PrivateDmEvent.kind -> {
@@ -32,6 +38,7 @@ abstract class WsViewModel : ViewModel() {
 
         override fun onError(error: Error, subscriptionId: String, relay: Relay) {
 //            Log.e("ERROR", "Relay ${relay.url}: ${error.message}")
+            onRecError(error, subscriptionId, relay)
         }
 
         override fun onRelayStateChange(type: Relay.Type, relay: Relay) {
@@ -69,6 +76,13 @@ abstract class WsViewModel : ViewModel() {
 
     }
 
+    open fun onRecError(error: Error, subscriptionId: String, relay: Relay) {
+
+    }
+
+    open fun onOk(relay: Relay) {
+
+    }
 
     fun getRand5(): String {
         return UUID.randomUUID().toString().substring(0..5)

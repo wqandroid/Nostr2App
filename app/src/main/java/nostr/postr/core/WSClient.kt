@@ -22,6 +22,12 @@ class WSClient(private val relays: List<Relay> = Constants.getUserRelays().filte
         }
     }
 
+    fun justConn() {
+        this.relays.forEach {
+            it.justConnection()
+        }
+    }
+
     fun close(subscriptionId: String) {
         RelayPool.close(subscriptionId)
         this.relays.forEach {
