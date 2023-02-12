@@ -14,7 +14,7 @@ class PublishActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPublishBinding
 
     private val listener = object : Client.Listener() {
-        override fun onNewEvent(event: Event, subscriptionId: String) {
+        override fun onEvent(event: Event, subscriptionId: String,relay: Relay) {
             if (event.pubKey.toHex() == AccountManger.getPublicKey()) {
                 Log.e("publish", event.toJson())
                 stop()

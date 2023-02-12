@@ -16,8 +16,20 @@ class TextNoteEvent(
 
     init {
         replyTos = tags.filter { it.firstOrNull() == "e" }.mapNotNull { it.getOrNull(1) }
+        //回复内容 的root
+
         mentions = tags.filter { it.firstOrNull() == "p" }.mapNotNull { it.getOrNull(1) }
+        //回复人的信息
     }
+
+    fun isReply():Boolean{
+        return replyTos.isNotEmpty()
+    }
+
+    fun isFeed():Boolean{
+        return replyTos.isNullOrEmpty() && mentions.isNullOrEmpty()
+    }
+
 
     companion object {
         const val kind = 1

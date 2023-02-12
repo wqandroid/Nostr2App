@@ -1,0 +1,82 @@
+package nostr.postr.core
+
+import android.util.Log
+import androidx.lifecycle.ViewModel
+import nostr.postr.Client
+import nostr.postr.Relay
+import nostr.postr.events.*
+import java.util.*
+
+abstract class WsViewModel : ViewModel() {
+
+    private val clientListener = object : Client.Listener() {
+        override fun onEvent(event: Event, subscriptionId: String, relay: Relay) {
+            when (event.kind) {
+                PrivateDmEvent.kind -> {
+                    onRecPrivateDmEvent(subscriptionId, event as PrivateDmEvent)
+                }
+                ContactListEvent.kind -> {
+                    onRecContactListEvent(subscriptionId, event as ContactListEvent)
+                }
+                MetadataEvent.kind -> {
+                    onRecMetadataEvent(subscriptionId, event as MetadataEvent)
+                }
+                TextNoteEvent.kind -> {
+                    onRecTextNoteEvent(subscriptionId, event as TextNoteEvent)
+                }
+                RecommendRelayEvent.kind -> {
+                    Log.d("RecommendRelayEvent--->", event.toJson())
+                }
+            }
+        }
+
+        override fun onError(error: Error, subscriptionId: String, relay: Relay) {
+//            Log.e("ERROR", "Relay ${relay.url}: ${error.message}")
+        }
+
+        override fun onRelayStateChange(type: Relay.Type, relay: Relay) {
+            Log.d(
+                "RELAY", "Relay ${relay.url} ${
+                    when (type) {
+                        Relay.Type.CONNECT -> "connected."
+                        Relay.Type.DISCONNECT -> "disconnected."
+                        Relay.Type.EOSE -> "sent all events it had stored."
+                    }
+                }"
+            )
+        }
+    }
+
+    val wsClient = lazy {
+        WSClient().also {
+            it.subscribe(clientListener)
+        }
+    }
+
+    open fun onRecMetadataEvent(subscriptionId: String, event: MetadataEvent) {
+
+    }
+
+    open fun onRecContactListEvent(subscriptionId: String, event: ContactListEvent) {
+
+    }
+
+    open fun onRecPrivateDmEvent(subscriptionId: String, event: PrivateDmEvent) {
+
+    }
+
+    open fun onRecTextNoteEvent(subscriptionId: String, event: TextNoteEvent) {
+
+    }
+
+
+    fun getRand5(): String {
+        return UUID.randomUUID().toString().substring(0..5)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        wsClient.value.unsubscribe(clientListener)
+        wsClient.value.disconnect()
+    }
+}

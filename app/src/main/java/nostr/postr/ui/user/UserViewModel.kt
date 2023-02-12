@@ -5,17 +5,23 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import fr.acinq.secp256k1.Hex
 import kotlinx.coroutines.*
 import nostr.postr.*
 import nostr.postr.core.AccountManger
+import nostr.postr.core.WSClient
+import nostr.postr.core.WsViewModel
 import nostr.postr.db.BlockUser
+import nostr.postr.db.FollowUserKey
 import nostr.postr.db.NostrDB
 import nostr.postr.db.UserProfile
 import nostr.postr.events.*
+import nostr.postr.ui.dashboard.FollowInfo
 import nostr.postr.ui.feed.Feed
 import nostr.postr.util.MD5
+import java.util.*
 
-class UserViewModel : ViewModel() {
+class UserViewModel : WsViewModel() {
 
     private val scope = CoroutineScope(Job() + Dispatchers.IO)
 
@@ -23,74 +29,86 @@ class UserViewModel : ViewModel() {
 
     val user = MutableLiveData<UserProfile>()
     val feedLiveData = MutableLiveData<Feed>()
-    val flowResult=MutableLiveData(false)
+    val flowResult = MutableLiveData(false)
 
 
-    private val clientListener = object : Client.Listener() {
+    val contactMetaDataLiveData = MutableLiveData<ContactMetaData>()
 
-        override fun onOK(relay: Relay) {
-            super.onOK(relay)
-            flowResult.postValue(true)
-        }
+    private val subID = "user_info_detail_${UUID.randomUUID().toString().substring(0..5)}"
 
-        override fun onNewEvent(event: Event, subscriptionId: String) {
-            when (event.kind) {
-                MetadataEvent.kind -> {
-                    val metadataEvent = event as MetadataEvent
-//                    Log.e("account--->", event.toJson())
-                    if (pubKey != event.pubKey.toHex()) return
-                    metadataEvent.contactMetaData?.let {
-                        val userProfile = UserProfile(event.pubKey.toHex()).apply {
-                            this.name = it.name
-                            this.about = it.about
-                            this.picture = it.picture
-                            this.nip05 = it.nip05
-                            this.display_name = it.display_name
-                            this.banner = it.banner
-                            this.website = it.website
-                            this.lud16 = it.lud16
-                        }
-                        Log.e("account--->", "---->${userProfile.name}")
-                        scope.launch {
-                            NostrDB.getDatabase(MyApplication.getInstance())
-                                .profileDao().insertUser(userProfile)
-                        }
-                    }
 
-                }
-                TextNoteEvent.kind -> {
-                    val textEvent = event as TextNoteEvent
+    private val idSet = hashSetOf<String>()
 
-                    if (pubKey != event.pubKey.toHex()) return
 
-                    var feed = nostr.postr.db.FeedItem(
-                        textEvent.id.toString(),
-                        textEvent.pubKey.toHex(),
-                        textEvent.createdAt,
-                        textEvent.content
-                    )
-                    feedLiveData.postValue(Feed(feed, user.value))
-                }
-                RecommendRelayEvent.kind -> {
-                    Log.d("RecommendRelayEvent--->", event.toJson())
-                }
+    override fun onRecMetadataEvent(subscriptionId: String, metadataEvent: MetadataEvent) {
+        super.onRecMetadataEvent(subscriptionId, metadataEvent)
+        if (subID != subscriptionId) return
+        Log.e("account--->", metadataEvent.toJson())
+        if (pubKey != metadataEvent.pubKey.toHex()) return
+        metadataEvent.contactMetaData?.let {
+
+            contactMetaDataLiveData.postValue(it)
+
+            val userProfile = UserProfile(metadataEvent.pubKey.toHex()).apply {
+                this.name = it.name
+                this.about = it.about
+                this.picture = it.picture
+                this.nip05 = it.nip05
+                this.display_name = it.display_name
+                this.banner = it.banner
+                this.website = it.website
+                this.lud16 = it.lud16
+            }
+            Log.e("account--->", "---->${userProfile.name}")
+            scope.launch {
+                NostrDB.getDatabase(MyApplication.getInstance())
+                    .profileDao().insertUser(userProfile)
             }
         }
+    }
 
-        override fun onError(error: Error, subscriptionId: String, relay: Relay) {
-            Log.e("ERROR", "Relay ${relay.url}: ${error.message}")
-        }
 
-        override fun onRelayStateChange(type: Relay.Type, relay: Relay) {
-            Log.d(
-                "RELAY", "Relay ${relay.url} ${
-                    when (type) {
-                        Relay.Type.CONNECT -> "connected."
-                        Relay.Type.DISCONNECT -> "disconnected."
-                        Relay.Type.EOSE -> "sent all events it had stored."
-                    }
-                }"
+    override fun onRecTextNoteEvent(subscriptionId: String, event: TextNoteEvent) {
+        super.onRecTextNoteEvent(subscriptionId, event)
+        if (subID != subscriptionId) return
+        if (!idSet.contains(event.id.toHex())) {
+//            Log.e("textEvent--->${event.id.toHex()}", event.toJson())
+            idSet.add(event.id.toHex())
+            var feed = nostr.postr.db.FeedItem(
+                event.id.toString(),
+                event.pubKey.toHex(),
+                event.createdAt,
+                event.content
             )
+            feedLiveData.postValue(Feed(feed, user.value).apply {
+                this.replyTos = event.replyTos
+                this.mentions = event.mentions
+            })
+        }
+    }
+
+    val followList = MutableLiveData<List<FollowInfo>>()
+    override fun onRecContactListEvent(subscriptionId: String, event: ContactListEvent) {
+        super.onRecContactListEvent(subscriptionId, event)
+
+        if (subscriptionId == subID) {
+
+            viewModelScope.launch {
+
+                withContext(Dispatchers.IO) {
+
+                    var list = event.follows
+                        .map {
+                            FollowInfo(
+                                it.pubKeyHex,
+                                it.relayUri,
+                                NostrDB.getDatabase(MyApplication._instance).profileDao()
+                                    .getUserInfo2(it.pubKeyHex)
+                            )
+                        }
+                    followList.postValue(list)
+                }
+            }
         }
     }
 
@@ -102,37 +120,55 @@ class UserViewModel : ViewModel() {
                 .profileDao().getUserInfo(pubKey)?.let {
                     user.postValue(it)
                 }
-            Client.subscribe(clientListener)
-            val filter = JsonFilter(
-                kinds = mutableListOf(0).apply {
-                    this.add(1)
-                },
-//                since=System.currentTimeMillis()/1000-3*24*3600,
-                authors = mutableListOf(pubKey)
+
+            val filters = mutableListOf(
+                JsonFilter(
+                    authors = mutableListOf(pubKey),
+                    kinds = mutableListOf(0, 3),
+                    limit = 1
+                ),
+                JsonFilter(
+                    authors = mutableListOf(pubKey),
+                    kinds = mutableListOf(1),
+                )
             )
-            Client.requestAndWatch(filters = mutableListOf(filter))
+            wsClient.value.requestAndWatch(subID, filters = filters)
         }
     }
 
 
-    fun addFlow(pubKey: String) {
+    fun addFlow(pubKey: String, follow: MutableList<String>) {
 
-        val list = mutableListOf<Contact>()
-        list.add(Contact(pubKeyHex = pubKey, relayUri = null))
 
-        val relayUser = mutableMapOf<String, ContactListEvent.ReadWrite>()
-        Constants.defaultRelays.filter {
-            it.enable
-        }.forEach {
-            relayUser[it.url]=ContactListEvent.ReadWrite(it.read, it.write)
+        scope.launch {
+
+            if (follow.contains(pubKey)) {
+                //unfollow
+                follow.remove(pubKey)
+            } else {
+                follow.add(pubKey)
+            }
+
+            val list = follow.map { Contact(it, null) }
+
+//        list.add(Contact(pubKeyHex = pubKey, relayUri = null))
+
+            val relayUser = mutableMapOf<String, ContactListEvent.ReadWrite>()
+            Constants.defaultRelays.filter {
+                it.enable
+            }.forEach {
+                relayUser[it.url] = ContactListEvent.ReadWrite(it.read, it.write)
+            }
+            val event =
+                ContactListEvent.create(list, relayUser, privateKey = AccountManger.getPrivateKey())
+            wsClient.value.send(event)
         }
-        val event = ContactListEvent.create(list, relayUser, privateKey = AccountManger.getPrivateKey())
-        Client.send(event)
     }
 
     override fun onCleared() {
+        wsClient.value.close(subID)
         super.onCleared()
-        Client.unsubscribe(listener = clientListener)
+
     }
 
 }

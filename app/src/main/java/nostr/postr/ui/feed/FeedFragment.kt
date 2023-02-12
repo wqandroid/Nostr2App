@@ -8,12 +8,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import nostr.postr.databinding.FragmentFeedBinding
-import nostr.postr.db.FeedItem
+import nostr.postr.ui.AppViewModel
 
 class FeedFragment : Fragment() {
 
     private lateinit var binding: FragmentFeedBinding
-    private lateinit var feedViewModel: FeedViewModel
+    private lateinit var feedViewModel: AppViewModel
 
     private lateinit var adapter: FeedAdapter
 
@@ -23,7 +23,7 @@ class FeedFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         feedViewModel =
-            ViewModelProvider(this)[FeedViewModel::class.java]
+            ViewModelProvider(this)[AppViewModel::class.java]
         binding = FragmentFeedBinding.inflate(inflater, container, false)
         feedViewModel.reqFeed()
         return binding.root

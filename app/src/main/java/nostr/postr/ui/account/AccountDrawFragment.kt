@@ -2,24 +2,29 @@ package nostr.postr.ui.account
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.schedulers.Schedulers
+import nostr.postr.MyApplication
 import nostr.postr.R
 import nostr.postr.core.AccountManger
 import nostr.postr.databinding.FragmentDrawLayoutBinding
+import nostr.postr.db.NostrDB
+import nostr.postr.db.UserProfile
 import nostr.postr.ui.user.UserDetailActivity
 
 class AccountDrawFragment : Fragment() {
 
     private lateinit var binding: FragmentDrawLayoutBinding
 
-    private val viewModel by viewModels<AccountViewModel>()
+
+    val dis = CompositeDisposable()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -37,9 +42,6 @@ class AccountDrawFragment : Fragment() {
                 AccountManger.logout()
                 updateLoginStatus()
             } else {
-//                AccountManger.login("nsec1cd3c5gaymh5xvqspwvcjpcv8p0neh7arah3rv767038sua48mdds8a3svd")
-//                viewModel.reqProfile(AccountManger.getPublicKey())
-                //c3638a23a4dde8660201733120e1870be79bfba3ede2367b5e7c4f0e76a7db5b
                 LoginBottomDialog().show(childFragmentManager, "")
             }
         }
@@ -51,27 +53,32 @@ class AccountDrawFragment : Fragment() {
             } else {
                 binding.ivDay.setImageResource(R.drawable.baseline_mode_night_24)
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-//                AppConfig.getInstance().saveNightModel(AppCompatDelegate.MODE_NIGHT_YES)
-            }
-        }
-
-        viewModel.user.observe(viewLifecycleOwner) {
-            if (AccountManger.isLogin() && it!=null) {
-                Glide.with(this).load(it.picture)
-                    .into(binding.ivAvatar)
-                binding.tvName.text = it.display_name ?: it.name
-                binding.tvDesc.text = it.about
             }
         }
 
         updateLoginStatus()
 
         binding.ivAvatar.setOnClickListener {
-            startActivity(
-                Intent(requireContext(), UserDetailActivity::class.java)
-                .apply {
-                    putExtra("pubkey",AccountManger.getPublicKey())
-                })
+            if (AccountManger.isLogin()) {
+                startActivity(
+                    Intent(requireContext(), UserDetailActivity::class.java)
+                        .apply {
+                            putExtra("pubkey", AccountManger.getPublicKey())
+                        })
+            } else {
+                LoginBottomDialog().show(childFragmentManager, "")
+            }
+        }
+
+
+    }
+
+    private fun showProfile(it: UserProfile?) {
+        if (AccountManger.isLogin() && it != null) {
+            Glide.with(this).load(it.picture)
+                .into(binding.ivAvatar)
+            binding.tvName.text = it.display_name ?: it.name
+            binding.tvDesc.text = it.about
         }
     }
 
@@ -79,8 +86,18 @@ class AccountDrawFragment : Fragment() {
 
         if (AccountManger.isLogin()) {
             binding.mbtLogin.text = "Logout"
-            viewModel.reqProfile(AccountManger.getPublicKey())
-            viewModel.loadSelfProfile()
+            binding.tvName.text = ""
+            binding.tvDesc.text = ""
+            dis.add(
+                    NostrDB.getDatabase(MyApplication._instance).profileDao()
+                        .getUserInfoRx(AccountManger.getPublicKey())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe {
+                            showProfile(it)
+                        }
+
+                )
         } else {
             binding.mbtLogin.text = "Login"
             binding.tvName.text = "未登录"
@@ -92,6 +109,11 @@ class AccountDrawFragment : Fragment() {
     override fun onResume() {
         super.onResume()
 
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        dis.clear()
     }
 
 }

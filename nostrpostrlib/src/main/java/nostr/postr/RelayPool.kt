@@ -5,7 +5,9 @@ import nostr.postr.events.Event
 /**
  * RelayPool manages the connection to multiple Relays and lets consumers deal with simple events.
  */
-object RelayPool: Relay.Listener {
+object RelayPool
+//    : Relay.Listener
+    {
     private val relays: MutableList<Relay> = ArrayList()
     private val listeners = HashSet<Listener>()
     private val eventIds = HashSet<String>()
@@ -14,7 +16,7 @@ object RelayPool: Relay.Listener {
     fun loadRelays(relayList: List<Relay>){
         synchronized(this){
             relayList.forEach {
-                addRelay(it)
+//                addRelay(it)
             }
         }
     }
@@ -37,15 +39,15 @@ object RelayPool: Relay.Listener {
         relays.forEach { it.disconnect() }
     }
 
-    fun addRelay(relay: Relay) {
-        relay.register(this)
-        relays += relay
-    }
-
-    fun removeRelay(relay: Relay): Boolean {
-        relay.unregister(this)
-        return relays.remove(relay)
-    }
+//    fun addRelay(relay: Relay) {
+//        relay.register(this)
+//        relays += relay
+//    }
+//
+//    fun removeRelay(relay: Relay): Boolean {
+//        relay.unregister(this)
+//        return relays.remove(relay)
+//    }
 
     fun getRelays(): List<Relay> = relays
 
@@ -75,26 +77,26 @@ object RelayPool: Relay.Listener {
         fun onRelayStateChange(type: Relay.Type, relay: Relay)
     }
 
-    @Synchronized
-    override fun onEvent(relay: Relay, subscriptionId: String, event: Event) {
-        listeners.forEach { it.onEvent(event, subscriptionId, relay) }
-        synchronized(this) {
-            if (eventIds.add(event.id.toHex())) {
-                listeners.forEach { it.onNewEvent(event, subscriptionId) }
-            }
-        }
-    }
-
-    override fun onError(relay: Relay, subscriptionId: String, error: Error) {
-        listeners.forEach { it.onError(error, subscriptionId, relay) }
-    }
-
-    override fun onRelayStateChange(relay: Relay, type: Relay.Type) {
-        listeners.forEach { it.onRelayStateChange(type, relay) }
-    }
-
-    override fun onOK(relay: Relay) {
-        listeners.forEach{it.onOK(relay)}
-    }
+//    @Synchronized
+//    override fun onEvent(relay: Relay, subscriptionId: String, event: Event) {
+//        listeners.forEach { it.onEvent(event, subscriptionId, relay) }
+//        synchronized(this) {
+//            if (eventIds.add(event.id.toHex())) {
+//                listeners.forEach { it.onNewEvent(event, subscriptionId) }
+//            }
+//        }
+//    }
+//
+//    override fun onError(relay: Relay, subscriptionId: String, error: Error) {
+//        listeners.forEach { it.onError(error, subscriptionId, relay) }
+//    }
+//
+//    override fun onRelayStateChange(relay: Relay, type: Relay.Type) {
+//        listeners.forEach { it.onRelayStateChange(type, relay) }
+//    }
+//
+//    override fun onOK(relay: Relay) {
+//        listeners.forEach{it.onOK(relay)}
+//    }
 
 }

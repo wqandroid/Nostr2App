@@ -9,6 +9,7 @@ import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
+
 object Utils {
     private val sha256: MessageDigest = MessageDigest.getInstance("SHA-256")
 
@@ -50,8 +51,12 @@ object Utils {
 
     fun decrypt(msg: String, sharedSecret: ByteArray): String {
         val parts = msg.split("?iv=")
+
+
         val iv = parts[1].run { Base64.decode(this) }
-        val encryptedMsg = parts.first().run { Base64.decode(this) }
+        val encryptedMsg = parts.first().run {
+            Base64.decode(this.toByteArray())
+        }
         val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.DECRYPT_MODE, SecretKeySpec(sharedSecret, "AES"), IvParameterSpec(iv))
         return String(cipher.doFinal(encryptedMsg))
@@ -68,6 +73,25 @@ object Utils {
     private val secp256k1 = Secp256k1.get()
 
     private val random = SecureRandom()
+
+    fun verifyKey(priKey: String): Boolean {
+        return try {
+            priKey.bechToBytes("nsec") is ByteArray
+        } catch (e: Exception) {
+            false
+        }
+    }
+    fun hexToBytes(s: String): ByteArray? {
+        val len = s.length
+        val buf = ByteArray(len / 2)
+        var i = 0
+        while (i < len) {
+            buf[i / 2] = ((s[i].digitToIntOrNull(16) ?: -1 shl 4) + s[i + 1].digitToIntOrNull(16)!!
+                ?: -1).toByte()
+            i += 2
+        }
+        return buf
+    }
 }
 
 fun ByteArray.toHex() = String(Hex.encode(this))
@@ -87,7 +111,7 @@ fun String.bechToBytes(hrp: String? = null): ByteArray {
 
     val decodedForm = Bech32.decodeBytes(this)
     hrp?.also {
-        if (it != decodedForm.first){
+        if (it != decodedForm.first) {
             throw IllegalArgumentException("Expected $it but obtained ${decodedForm.first}")
         }
     }
@@ -98,3 +122,5 @@ fun String.bechToBytes(hrp: String? = null): ByteArray {
  * Interpret the string as Bech32 encoded and return hrp and ByteArray as Pair
  */
 fun String.bechToBytesWithHrp() = Bech32.decodeBytes(this).run { Pair(first, second) }
+
+

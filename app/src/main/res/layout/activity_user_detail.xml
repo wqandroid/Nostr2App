@@ -10,129 +10,159 @@
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
-        android:layout_height="210dp"
+        android:layout_height="280dp"
         android:fitsSystemWindows="true"
-        android:background="?colorPrimary"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:theme="@style/Theme.DrawDemo.AppBarOverlay">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/toolbar_layout"
             style="@style/Widget.MaterialComponents.Toolbar.Primary"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:fitsSystemWindows="true"
+            app:contentScrim="?attr/colorSurface"
+            app:layout_scrollFlags="scroll|enterAlways"
             app:titleEnabled="false"
-            app:contentScrim="?colorPrimary"
-            app:layout_scrollFlags="scroll|enterAlwaysCollapsed"
             app:toolbarId="@+id/toolbar">
 
+
             <ImageView
-                android:scaleType="centerCrop"
                 android:id="@+id/iv_banner"
-                android:fitsSystemWindows="true"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-            <View
-                android:id="@+id/iv_avatar_blur"
-                android:visibility="gone"
-                android:alpha="0.7"
+                android:layout_height="match_parent"
                 android:fitsSystemWindows="true"
-                android:background="@color/md_theme_onTertiary"
+                android:scaleType="centerCrop" />
+
+            <ImageView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent"
+                android:background="#40000000"
+                android:fitsSystemWindows="true" />
+
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="bottom"
-                android:fitsSystemWindows="true"
-                android:orientation="vertical"
-                android:paddingTop="76dp"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                android:paddingBottom="16dp"
-                >
+                android:layout_height="match_parent">
+
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:id="@+id/ll_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?colorSurface"
+                    android:orientation="vertical"
+                    android:minHeight="86dp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    app:layout_constraintBottom_toBottomOf="parent">
+
+                    <ProgressBar
+                        android:id="@+id/progress_horizontal"
+                        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:indeterminate="true" />
+
+                    <TextView
+                        android:id="@+id/tv_name"
+                        style="@style/TextAppearance.Material3.TitleLarge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:lines="1"
+                        android:text="Name"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/tv_nip05"
+                        style="@style/TextAppearance.Material3.BodySmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:drawableStart="@drawable/svg_nip05_auth"
+                        android:drawablePadding="2dp"
+                        android:text="sss@ss"
+                        android:visibility="gone"
+                         />
+
+
+                    <TextView
+                        android:id="@+id/nip16"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:lines="2"
+                        android:ellipsize="end"
+                        android:textColor="@color/md_theme_primary"
+                        android:textSize="12sp"
+                        android:visibility="gone"
+                        app:drawableStartCompat="@drawable/baseline_electric_bolt_24"
+                        app:drawableTint="@color/md_theme_tertiary" />
+
+
+                    <TextView
+                        android:id="@+id/tv_desc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text=""
+                        android:visibility="gone" />
+
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/iv_avatar"
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
-                    android:padding="1dp"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:shapeAppearance="@style/round_circle"
+                    android:layout_width="68dp"
+                    android:layout_height="68dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="80dp"
+                    android:layout_marginBottom="12dp"
                     android:background="@color/md_theme_tertiaryContainer"
+                    android:padding="2dp"
+                    app:layout_constraintBottom_toTopOf="@id/ll_content"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_goneMarginStart="16dp"
+                    app:shapeAppearance="@style/round_circle"
                     app:strokeColor="@color/md_theme_onTertiary"
-                    app:strokeWidth="1dp" />
-
-                <TextView
-                    android:id="@+id/tv_name"
-                    style="@style/TextAppearance.AppCompat.Headline"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingTop="@dimen/nav_header_vertical_spacing"
-                    android:text="Name"
-                    android:visibility="gone"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                    android:textColor="@color/md_theme_onTertiary"
-                    app:layout_constraintBottom_toTopOf="@id/tv_desc" />
-
-                <TextView
-                    android:id="@+id/tv_desc"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=""
-                    android:maxLines="3"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="24dp"
-                    android:textColor="?colorOnTertiary"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
-                <TextView
-                    style="@style/TextAppearance.Material3.BodySmall"
-                    android:paddingLeft="3dp"
-                    android:drawablePadding="2dp"
-                    android:visibility="gone"
-                    android:textColor="@color/md_theme_onTertiary"
-                    android:drawableStart="@drawable/svg_nip05_auth"
-                    app:layout_constraintBottom_toBottomOf="@id/tv_desc"
-                    app:layout_constraintTop_toTopOf="@id/tv_desc"
-                    app:layout_constraintStart_toEndOf="@id/tv_desc"
-                    android:text="sss@ss"
-                    android:lines="1"
-                    android:maxWidth="90dp"
-                    android:ellipsize="middle"
-                    android:id="@+id/tv_nip05"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    app:strokeWidth="2dp" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:layout_width="wrap_content"
-                    android:text="Follow"
                     android:id="@+id/mbt_follow"
-                    android:layout_marginBottom="12dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:text="Follow"
+                    android:layout_marginBottom="16dp"
+                    app:layout_constraintBottom_toTopOf="@id/ll_content"
+                    app:backgroundTint="@color/md_theme_tertiary"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
 
             </androidx.constraintlayout.widget.ConstraintLayout>
+
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
-                android:fitsSystemWindows="false"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
+                android:layout_height="56dp"
+                app:collapseIcon="@drawable/baseline_arrow_back_24"
+                app:contentInsetStart="1dp"
+                app:titleTextColor="@color/md_theme_onSurface"
                 app:layout_collapseMode="pin"
-                app:title=""
-                app:titleTextColor="?colorOnTertiary"
                 app:navigationIcon="@drawable/baseline_arrow_back_24"
-                app:navigationIconTint="?colorOnTertiary"
-                app:popupTheme="@style/AppTheme.PopupOverlay">
+                app:popupTheme="@style/Theme.DrawDemo.PopupOverlay"
+                app:title="">
 
                 <ImageView
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
                     android:layout_gravity="end"
                     android:scaleType="center"
-                    android:src="@drawable/baseline_more_vert_24"
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"/>
+                    android:src="@drawable/baseline_more_vert_24" />
+
+
+
 
             </com.google.android.material.appbar.MaterialToolbar>
 
@@ -140,29 +170,32 @@
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
 
-
-
-
     </com.google.android.material.appbar.AppBarLayout>
-    <ProgressBar
-        android:id="@+id/progress_horizontal"
-        android:indeterminate="true"
-        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"/>
+
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/fab_margin"
+        android:visibility="gone"
+        app:layout_anchor="@id/app_bar"
+        app:layout_anchorGravity="bottom|end"
+        app:srcCompat="@drawable/baseline_favorite_border_24" />
+
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvFeed"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:itemCount="3"
-        android:layout_marginTop="6dp"
-        android:id="@+id/rvFeed"
-        tools:listitem="@layout/fragment_feed_item"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:context=".ui.user.UserDetailActivity"
-        >
-
-    </androidx.recyclerview.widget.RecyclerView>
+        tools:itemCount="3"
+        tools:listitem="@layout/fragment_feed_item" />
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+
+
+

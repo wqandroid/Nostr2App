@@ -23,14 +23,17 @@ class PrivateDmEvent(
      * nip-04 EncryptedDmEvent but may omit the recipient, too. This value can be queried and used
      * for initial messages.
      */
-    @Transient val recipientPubKey: ByteArray?
+    @Transient
+    val recipientPubKey: ByteArray?
+
     /**
      * To be fully compatible with nip-04, we read e-tags that are in violation to nip-18.
      *
      * Nip-18 messages should refer to other events by inline references in the content like
      * `[](e/c06f795e1234a9a1aecc731d768d4f3ca73e80031734767067c82d67ce82e506).
      */
-    @Transient val replyTo: String?
+    @Transient
+    val replyTo: String?
 
     init {
         recipientPubKey = tags.firstOrNull { it.firstOrNull() == "p" }?.run { Hex.decode(this[1]) }
@@ -46,8 +49,10 @@ class PrivateDmEvent(
      * Tries to decrypt content using the provided keys
      */
     fun plainContent(privKey: ByteArray, pubKey: ByteArray): String? {
-        val sharedSecret = Utils.getSharedSecret(privKey, pubKey)
+
+
         return try {
+            val sharedSecret = Utils.getSharedSecret(privKey, pubKey)
             val retVal = Utils.decrypt(content, sharedSecret)
             // decrypt randomly "succeeds". With the nip18Advertisement prefix we kill two birds
             // with one stone:
@@ -57,12 +62,18 @@ class PrivateDmEvent(
             if (retVal.startsWith(nip18Advertisement)) {
                 retVal.substring(16)
             } else {
-                null
+                retVal
             }
         } catch (e: Exception) {
-            null
+//            e.printStackTrace()
+            "error_sharedSecret:${content}"
         }
     }
+
+    override fun toString(): String {
+        return "PrivateDmEvent(recipientPubKey=${recipientPubKey?.contentToString()}, "
+    }
+
 
     companion object {
         const val kind = 4
@@ -78,9 +89,14 @@ class PrivateDmEvent(
             advertiseNip18: Boolean = true
         ): PrivateDmEvent {
             val content = Utils.encrypt(
-                if (advertiseNip18) { nip18Advertisement } else { "" } + msg,
+                if (advertiseNip18) {
+                    nip18Advertisement
+                } else {
+                    ""
+                } + msg,
                 privateKey,
-                recipientPubKey)
+                recipientPubKey
+            )
             val pubKey = Utils.pubkeyCreate(privateKey)
             val tags = mutableListOf<List<String>>()
             publishedRecipientPubKey?.let {

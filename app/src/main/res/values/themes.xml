@@ -43,11 +43,10 @@
     </style>
 
 
+
     <style name="AppTheme.TransparentStatusBar">
-        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentStatus">false</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
     </style>
 
 
@@ -56,6 +55,7 @@
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
     <style name="Theme.DrawDemo.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
 
     <style name="Theme.DrawDemo.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 

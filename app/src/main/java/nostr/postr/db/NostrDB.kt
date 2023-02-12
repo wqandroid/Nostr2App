@@ -2,9 +2,13 @@ package nostr.postr.db
 
 import android.content.Context
 import androidx.room.*
+import io.reactivex.rxjava3.core.Flowable
 
 
-@Database(entities = [FeedItem::class, UserProfile::class, BlockUser::class], version = 1)
+@Database(
+    entities = [FeedItem::class, UserProfile::class, BlockUser::class, FollowUserKey::class],
+    version = 1
+)
 abstract class NostrDB : RoomDatabase() {
 
 
@@ -13,15 +17,19 @@ abstract class NostrDB : RoomDatabase() {
 
     abstract fun blockUserDao(): BlockUserDao
 
+    abstract fun followUserKeyDao(): FollowUserKeyDao
+
     //
     companion object {
         private var appDatabase: NostrDB? = null
         fun getDatabase(context: Context): NostrDB {
             if (appDatabase == null) {
-                appDatabase = Room.databaseBuilder(context, NostrDB::class.java, "nor7.db")
-                    .fallbackToDestructiveMigration()
-                    .allowMainThreadQueries()
-                    .build()
+                synchronized(this) {
+                    appDatabase = Room.databaseBuilder(context, NostrDB::class.java, "nor10.db")
+                        .fallbackToDestructiveMigration()
+                        .allowMainThreadQueries()
+                        .build()
+                }
             }
             return appDatabase!!
         }
@@ -32,11 +40,11 @@ abstract class NostrDB : RoomDatabase() {
 
 @Dao
 interface FeedDao {
-    @Query("SELECT * FROM feed_info ORDER BY created_at DESC LIMIT 100")
+    @Query("SELECT * FROM feed_info ORDER BY created_at DESC LIMIT 200")
     suspend fun getAll(): List<FeedItem>
 
     @Query("SELECT * FROM feed_info ORDER BY created_at DESC LIMIT 1")
-    suspend fun getLast(): FeedItem?
+    fun getLast(): FeedItem?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFeed(feed: FeedItem)
@@ -62,10 +70,35 @@ interface UserProfileDao {
     @Query("select * from user_profile where pubkey =:s")
     suspend fun getUserInfo(s: String): UserProfile?
 
+    @Query("select * from user_profile where pubkey =:s")
+    fun getUserInfo2(s: String): UserProfile?
+
+    @Query("select * from user_profile where pubkey =:s")
+    fun getUserInfoRx(s: String): Flowable<UserProfile?>
+
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUser(user: UserProfile)
 
+
 }
+
+@Dao
+interface FollowUserKeyDao {
+
+    @Query("SELECT * FROM follow_user")
+    fun getAll(): Flowable<List<FollowUserKey>>
+
+    @Query("select * from follow_user where pubkey =:s")
+    suspend fun getFollowUser(s: String): FollowUserKey?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertFollow(user: FollowUserKey)
+
+    @Delete
+    suspend fun delete(feed: FollowUserKey): Int
+}
+
 
 @Dao
 interface BlockUserDao {

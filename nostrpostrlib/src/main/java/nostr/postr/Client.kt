@@ -1,7 +1,6 @@
 package nostr.postr
 
 import nostr.postr.events.Event
-import java.util.Objects
 import java.util.UUID
 
 /**
@@ -9,7 +8,7 @@ import java.util.UUID
  * published through multiple relays.
  * Events are stored with their respective persona.
  */
-object Client : RelayPool.Listener {
+object Client {
     /**
      * Lenient mode:
      *
@@ -20,77 +19,71 @@ object Client : RelayPool.Listener {
      *        something.
      **/
     var lenient: Boolean = false
-    private val listeners = HashSet<Listener>()
+
+    //    private val listeners = HashSet<Listener>()
     internal var relays = Constants.defaultRelays.filter { it.enable }
-    internal val subscriptions: MutableMap<String, MutableList<JsonFilter>> = mutableMapOf()
+
 
 
     fun connect(
         relays: List<Relay> = Constants.defaultRelays
     ) {
-        synchronized(this){
-            val temp=relays.filter {
-                it.enable
-            }.toList()
-            RelayPool.register(this)
-            RelayPool.loadRelays(temp)
-            this.relays =temp
-        }
+//        synchronized(this) {
+//            val temp = relays.filter {
+//                it.enable
+//            }.toList()
+//            RelayPool.register(this)
+//            RelayPool.loadRelays(temp)
+//            this.relays = temp
+//        }
     }
 
     fun requestAndWatch(
         subscriptionId: String = UUID.randomUUID().toString().substring(0..10),
         filters: MutableList<JsonFilter> = mutableListOf(JsonFilter())
     ) {
-        synchronized(this){
-            subscriptions[subscriptionId] = filters
-            RelayPool.requestAndWatch(subscriptionId)
+
+        synchronized(this) {
+//            RelayPool.requestAndWatch(subscriptionId)
+            relays.forEach {
+                it.requestAndWatch(subscriptionId = subscriptionId,null,filters)
+            }
         }
     }
 
     fun send(signedEvent: Event) {
-        synchronized(this){
-            RelayPool.send(signedEvent)
+        synchronized(this) {
+            relays.forEach {
+                it.send(signedEvent)
+            }
         }
     }
 
     fun close(subscriptionId: String) {
         RelayPool.close(subscriptionId)
-    }
-
-    fun disconnect() {
-        RelayPool.unregister(this)
-        RelayPool.disconnect()
-    }
-
-    override fun onEvent(event: Event, subscriptionId: String, relay: Relay) {
-        synchronized(this){
-            listeners.forEach { it.onEvent(event, subscriptionId, relay) }
+        relays.forEach {
+            it.close(subscriptionId)
         }
     }
 
-    override fun onNewEvent(event: Event, subscriptionId: String) {
-        listeners.forEach { it.onNewEvent(event, subscriptionId) }
-    }
-
-    override fun onError(error: Error, subscriptionId: String, relay: Relay) {
-        listeners.forEach { it.onError(error, subscriptionId, relay) }
-    }
-
-    override fun onOK(relay: Relay) {
-        listeners.forEach { it.onOK(relay) }
-    }
-
-    override fun onRelayStateChange(type: Relay.Type, relay: Relay) {
-        listeners.forEach { it.onRelayStateChange(type, relay) }
+    fun disconnect() {
+        relays.forEach {
+            it.disconnect()
+        }
     }
 
     fun subscribe(listener: Listener) {
-        listeners.add(listener)
+//        listeners.add(listener)
+        relays.forEach {
+            it.register(listener)
+        }
     }
 
     fun unsubscribe(listener: Listener): Boolean {
-        return listeners.remove(listener)
+        relays.forEach {
+            it.unregister(listener)
+        }
+        return true
     }
 
 
@@ -100,10 +93,6 @@ object Client : RelayPool.Listener {
          */
         open fun onEvent(event: Event, subscriptionId: String, relay: Relay) = Unit
 
-        /**
-         * A new message was received
-         */
-        open fun onNewEvent(event: Event, subscriptionId: String) = Unit
 
         /**
          * A new or repeat message was received

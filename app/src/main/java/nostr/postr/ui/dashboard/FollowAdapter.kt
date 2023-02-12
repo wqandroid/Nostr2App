@@ -15,7 +15,22 @@ import nostr.postr.util.UIUtils.makeGone
 import nostr.postr.util.UIUtils.makeVisibility
 import java.util.regex.Pattern
 
-data class FollowInfo(val pubkey: String,val name:String?, val userProfile: UserProfile?)
+data class FollowInfo(val pubkey: String, val name: String?, var userProfile: UserProfile?){
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as FollowInfo
+
+        if (pubkey != other.pubkey) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return pubkey.hashCode()
+    }
+}
 
 class FollowAdapter(var listData: MutableList<FollowInfo>) :
     RecyclerView.Adapter<FollowAdapter.FollowViewHolder>() {
@@ -32,12 +47,15 @@ class FollowAdapter(var listData: MutableList<FollowInfo>) :
 
     override fun onBindViewHolder(holder: FollowViewHolder, position: Int) {
         val item: FollowInfo = listData[position]
-        holder.binding.tvName.text = item.name
 
-        if (item.userProfile?.nip05?.isNotEmpty()==true){
+        holder.binding.tvName.text =
+            if (item.userProfile == null) item.name ?: item.pubkey else item.userProfile?.bestName()
+
+
+        if (item.userProfile?.nip05?.isNotEmpty() == true) {
             holder.binding.tvNip05.makeVisibility()
-            holder.binding.tvNip05.text=item.userProfile.nip05
-        }else{
+            holder.binding.tvNip05.text = item.userProfile?.nip05
+        } else {
             holder.binding.tvNip05.makeGone()
         }
 
@@ -46,12 +64,9 @@ class FollowAdapter(var listData: MutableList<FollowInfo>) :
         )
 
         holder.binding.ivAvatar.setOnClickListener {
-            clickListener?.onClick(item,it)
+            clickListener?.onClick(item, it)
         }
     }
-
-
-
 
 
     override fun getItemCount() = listData.size

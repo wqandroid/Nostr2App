@@ -28,7 +28,7 @@ class AccountViewModel : ViewModel() {
 
 
     private val clientListener = object : Client.Listener() {
-        override fun onNewEvent(event: Event, subscriptionId: String) {
+        override fun onEvent(event: Event, subscriptionId: String,relay: Relay) {
             when (event.kind) {
                 MetadataEvent.kind, // 0
                 TextNoteEvent.kind, // 1

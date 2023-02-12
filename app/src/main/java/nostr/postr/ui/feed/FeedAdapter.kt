@@ -14,7 +14,10 @@ import nostr.postr.util.UIUtils.makeGone
 import nostr.postr.util.UIUtils.makeVisibility
 import java.util.regex.Pattern
 
-data class Feed(val feedItem: FeedItem, val userProfile: UserProfile?)
+data class Feed(val feedItem: FeedItem, val userProfile: UserProfile?) {
+    var replyTos: List<String>? = null
+    var mentions: List<String>? = null
+}
 
 class FeedAdapter(var listData: MutableList<Feed>) :
     RecyclerView.Adapter<FeedAdapter.FeedViewHolder>() {
@@ -35,22 +38,27 @@ class FeedAdapter(var listData: MutableList<Feed>) :
         val item: Feed = listData[position]
         holder.binding.tvContent.text = item.feedItem.content
         holder.binding.tvTime.text = parseTime(item.feedItem.created_at)
-        holder.binding.tvName.text = item.userProfile?.display_name ?: item.userProfile?.name?:item.feedItem.pubkey
+        holder.binding.tvName.text =
+            item.userProfile?.display_name ?: item.userProfile?.name ?: item.feedItem.pubkey
 
-
-        if (item.userProfile == null || item.userProfile.name.isNullOrEmpty()){
-            holder.binding.tvDesc.makeGone()
-            holder.binding.tvName.text=Hex.decode(item.feedItem.pubkey).toNpub()
-            holder.binding.tvNip05.makeGone()
+        if (item.replyTos.isNullOrEmpty()){
+            holder.binding.tvReply.makeGone()
         }else{
-            holder.binding.tvDesc.makeVisibility()
-            holder.binding.tvDesc.text= Hex.decode(item.feedItem.pubkey).toNpub()
-            holder.binding.tvName.text=item.userProfile.display_name ?:item.userProfile.name
+            holder.binding.tvReply.makeVisibility()
+            holder.binding.tvReply.text="@reply${item.replyTos!![0]}"
+        }
 
-            if (item.userProfile.nip05?.isNotEmpty()==true){
+        if (item.userProfile == null || item.userProfile.name.isNullOrEmpty()) {
+            holder.binding.tvName.text = Hex.decode(item.feedItem.pubkey).toNpub()
+            holder.binding.tvNip05.makeGone()
+        } else {
+//            holder.binding.tvDesc.makeVisibility()
+//            holder.binding.tvDesc.text = Hex.decode(item.feedItem.pubkey).toNpub()
+            holder.binding.tvName.text = item.userProfile.display_name ?: item.userProfile.name
+            if (item.userProfile.nip05?.isNotEmpty() == true) {
                 holder.binding.tvNip05.makeVisibility()
-                holder.binding.tvNip05.text=item.userProfile.nip05
-            }else{
+                holder.binding.tvNip05.text = item.userProfile.nip05
+            } else {
                 holder.binding.tvNip05.makeGone()
             }
         }
@@ -74,10 +82,10 @@ class FeedAdapter(var listData: MutableList<Feed>) :
         }
 
         holder.binding.ivMore.setOnClickListener {
-            clickListener?.onClick(item,it)
+            clickListener?.onClick(item, it)
         }
         holder.binding.ivAvatar.setOnClickListener {
-            clickListener?.onClick(item,it)
+            clickListener?.onClick(item, it)
         }
     }
 

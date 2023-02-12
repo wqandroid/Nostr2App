@@ -1,34 +1,37 @@
 package nostr.postr.core
 
-import android.util.Log
 import com.tencent.mmkv.MMKV
 import nostr.postr.*
 
 object AccountManger {
 
-    private val pKey="pri_key_2"
+    private val pKey = "pri_key_2"
 
     private val mmkv = lazy {
         MMKV.defaultMMKV(1, "asd_wq")
     }
 
     fun isLogin(): Boolean {
-        return mmkv.value.decodeString(pKey,"")!!.isNotEmpty()
+        return mmkv.value.decodeString(pKey, "")!!.isNotEmpty()
     }
 
 
+    var follows = mutableListOf<String>()
+
+
     fun getPublicKey(): String {
-        if (isLogin()){
+        if (isLogin()) {
             return Utils.pubkeyCreate(mmkv.value.decodeString(pKey)!!.bechToBytes()).toHex()
-        }else{
-            throw  java.lang.IllegalStateException("please login")
+        } else {
+            throw java.lang.IllegalStateException("please login")
         }
     }
 
 
-    fun getPrivateKey():ByteArray{
+    fun getPrivateKey(): ByteArray {
         return mmkv.value.decodeString(pKey)!!.bechToBytes()
     }
+
 
 //
 //    fun loadpubKey(){
@@ -45,6 +48,6 @@ object AccountManger {
     }
 
     fun logout() {
-        mmkv.value.encode(pKey,"")
+        mmkv.value.encode(pKey, "")
     }
 }

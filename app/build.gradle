@@ -56,9 +56,14 @@ dependencies {
     implementation 'fr.acinq.secp256k1:secp256k1-kmp-jvm:0.7.1'
     implementation 'fr.acinq.secp256k1:secp256k1-kmp-jni-android:0.7.1'
     implementation "androidx.room:room-ktx:2.5.0"
+    implementation 'androidx.room:room-rxjava3:2.5.0'
     // WTF: https://stackoverflow.com/a/60492942/969478
     implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
     kapt "androidx.room:room-compiler:2.5.0"
+
+    implementation 'io.reactivex.rxjava3:rxandroid:3.0.2'
+    implementation 'io.reactivex.rxjava3:rxjava:3.1.5'
+
 
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     kapt 'com.github.bumptech.glide:compiler:4.11.0'

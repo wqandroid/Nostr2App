@@ -1,32 +1,33 @@
-package nostr.postr.ui.feed
+package nostr.postr.ui
 
 import android.util.Log
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
 import nostr.postr.*
 import nostr.postr.core.AccountManger
 import nostr.postr.db.BlockUser
+import nostr.postr.db.FollowUserKey
 import nostr.postr.db.NostrDB
 import nostr.postr.db.UserProfile
 import nostr.postr.events.*
 import nostr.postr.ui.dashboard.FollowInfo
+import nostr.postr.ui.feed.Feed
 import nostr.postr.util.MD5
 import java.util.*
 
-class FeedViewModel : ViewModel() {
+class AppViewModel : ViewModel() {
 
     private val scope = CoroutineScope(Job() + Dispatchers.IO)
 
+    //自己的用户信息
+    var pubKey: String = ""
 
     private var filterList = mutableListOf("棋牌", "S9", "广告机器人", "全球华人", "抖音快手", "Amethyst", "您的Pi")
 
     val feedCountLiveData = MutableLiveData<Int>(0)
     val feedLiveData = MutableLiveData<List<Feed>>()
 
-    val followList = MutableLiveData<List<FollowInfo>>()
 
     private val blockList = mutableListOf<String>()
     private val blockContentList = mutableListOf<String>()
@@ -34,13 +35,12 @@ class FeedViewModel : ViewModel() {
     private var count = 0
     private var profileList = mutableListOf<String>()
 
-    private var followSet = mutableSetOf<FollowInfo>()
 
     private var profileSubscriptionId: String = ""
     private val mainSubscriptionId = "mainUser_${UUID.randomUUID().toString().substring(0..5)}"
 
     private val clientListener = object : Client.Listener() {
-        override fun onNewEvent(event: Event, subscriptionId: String) {
+        override fun onEvent(event: Event, subscriptionId: String, relay: Relay) {
             when (event.kind) {
                 MetadataEvent.kind, // 0
                 TextNoteEvent.kind, // 1
@@ -52,40 +52,60 @@ class FeedViewModel : ViewModel() {
 //                else -> Log.d("UNHANDLED_EVENT", event.toJson())
             }
             when (event.kind) {
+
+                PrivateDmEvent.kind -> {
+
+
+                    var even = event as PrivateDmEvent
+//                    var pubkeyToUse = event.pubKey
+//                    val recepientPK = event.recipientPubKey
+
+                    if (event.pubKey.toHex() == pubKey) {
+//                        Log.e("msg_from", "self --message")
+//                        Log.e(
+//                            "msg_from--->",
+//                            "${subscriptionId}-->\n私信:${
+//                                even.plainContent(
+//                                    AccountManger.getPrivateKey(),
+//                                    even.recipientPubKey!!
+//                                )
+//                            }"
+//                        )
+                    } else {
+//                        Log.e(
+//                            "msg_from--->",
+//                            "${subscriptionId}-->\n私信:${
+//                                even.plainContent(
+//                                    AccountManger.getPrivateKey(),
+//                                    even.pubKey
+//                                )
+//                            }"
+//                        )
+
+                    }
+//
+
+                }
                 ContactListEvent.kind -> {
                     val event = event as ContactListEvent
-                    Log.e(
-                        "ContactListEvent--->",
-                        "${subscriptionId}-->\n${Thread.currentThread().name}\n--->$event"
-                    )
+
 //                    if (subscriptionId == mainSubscriptionId) {
                     scope.launch {
                         event.follows.forEach {
-
-                            val profile =
-                                NostrDB.getDatabase(MyApplication._instance).profileDao()
-                                    .getUserInfo(it.pubKeyHex)
-
-                            followSet.add(
-                                FollowInfo(
-                                    it.pubKeyHex,
-                                    it.relayUri,
-                                    profile
-                                )
-                            )
-                            followList.postValue(followSet.toList())
-                            if (profile == null) {
-                                reqProfile(listOf(it.pubKeyHex))
-                            }
-
+                            NostrDB.getDatabase(MyApplication._instance)
+                                .followUserKeyDao()
+                                .insertFollow(FollowUserKey(it.pubKeyHex, status = 1).apply {
+                                    this.name = it.relayUri
+                                })
                         }
-                        reqFollowFeed(event.follows.map { it.pubKeyHex })
+//                        reqFollowFeed(event.follows.map { it.pubKeyHex })
                     }
-
                 }
                 MetadataEvent.kind -> {
                     val metadataEvent = event as MetadataEvent
-//                    Log.e("MetadataEvent--->", event.toJson())
+                    if (event.pubKey.toHex() == pubKey) {
+                        Log.e("MetadataEvent--->", event.toJson())
+                    }
 
                     metadataEvent.contactMetaData?.let {
                         val userProfile = UserProfile(event.pubKey.toHex()).apply {
@@ -106,20 +126,20 @@ class FeedViewModel : ViewModel() {
                     }
                 }
                 TextNoteEvent.kind -> {
-
+//                    if (!followSet.map { it.pubkey }.contains(textEvent.pubKey.toHex())){
+//                        Log.e("no_follow", "拦截---->${textEvent.content}")
+//                        return
+//                    }
                     val textEvent = event as TextNoteEvent
-
-                    if (blockList.contains(textEvent.pubKey.toHex()) || blockContentList.contains(
-                            MD5.md5(textEvent.content)
-                        )
-                    ) return
-
-                    if (filterList.any { textEvent.content.contains(it) }) {
-                        Log.e("block", "拦截---->${textEvent.content}")
-                        return
-                    }
+                    if (subscriptionId != mainSubscriptionId) return
                     scope.launch {
 
+//                        if (blockList.contains(textEvent.pubKey.toHex()) || blockContentList.contains(
+//                                MD5.md5(textEvent.content)
+//                            )
+//                        ) return@launch
+
+//                        if (textEvent.isLage()) return@launch
                         var feed = nostr.postr.db.FeedItem(
                             textEvent.id.toString(),
                             textEvent.pubKey.toHex(),
@@ -129,10 +149,11 @@ class FeedViewModel : ViewModel() {
                         NostrDB.getDatabase(MyApplication.getInstance())
                             .feedDao().insertFeed(feed)
                         count++
-//                        if (count % 20 == 0) {
-//                            loadFeedFromDB()
-//                        }
-                        feedCountLiveData.postValue(count)
+                        if (count % 20 == 0) {
+                            loadFeedFromDB()
+                        }
+                        Log.e("TextNoteEvent--->$count", event.toJson())
+//                        feedCountLiveData.postValue(count)
                         val userProfile = NostrDB.getDatabase(MyApplication._instance).profileDao()
                             .getUserInfo(feed.pubkey)
                         if (userProfile == null) {
@@ -142,7 +163,6 @@ class FeedViewModel : ViewModel() {
                                 profileList.clear()
                             }
                         }
-
                     }
 
                 }
@@ -250,6 +270,7 @@ class FeedViewModel : ViewModel() {
         Client.requestAndWatch(
             filters = mutableListOf(
                 JsonFilter(
+                    since = System.currentTimeMillis() / 1000 - (4 * 3600),
                     kinds = listOf(TextNoteEvent.kind),
                     tags = map,
                     limit = 200
@@ -260,23 +281,34 @@ class FeedViewModel : ViewModel() {
 
 
     fun reqMainUserInfo() {
-        //    ["REQ","mainUser 8563",{"#p":["9e9764b9415b2ff0e24733e3fe685922e79b4812c6ad412a9e05447153f05cbb"],"kinds":[1,3,4],"limit":5000},{"authors":["9e9764b9415b2ff0e24733e3fe685922e79b4812c6ad412a9e05447153f05cbb"],"kinds":[0,1,2,3,4]}]
 
         if (!AccountManger.isLogin()) return
         Client.subscribe(clientListener)
-        val pubKey = AccountManger.getPublicKey()
+        pubKey = AccountManger.getPublicKey()
         val map = mutableMapOf<String, List<String>>()
             .apply {
                 this["p"] = listOf(pubKey)
             }
         val filter = mutableListOf(
+
             JsonFilter(
-                kinds = mutableListOf(1, 3, 4),
-                tags = map
+                authors = mutableListOf(pubKey),
+                kinds = mutableListOf(0),
+                limit = 1
             ),
             JsonFilter(
-                kinds = mutableListOf(0, 1, 2, 3, 4),
+                authors = mutableListOf(pubKey),
+                kinds = mutableListOf(3),
+                limit = 1
+            ),
+
+            JsonFilter(
+                kinds = mutableListOf(1, 6),
+                limit = 200,
+            ),
+            JsonFilter(
                 authors = listOf(AccountManger.getPublicKey()),
+                kinds = mutableListOf(1984)
             )
         )
         Client.requestAndWatch(subscriptionId = mainSubscriptionId, filters = filter)
