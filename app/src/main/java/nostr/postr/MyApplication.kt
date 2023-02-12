@@ -1,6 +1,7 @@
 package nostr.postr
 
 import android.app.Application
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.color.DynamicColors
 import com.tencent.mmkv.MMKV
@@ -17,6 +18,8 @@ class MyApplication : Application() {
 
         //链接所有ws
         Client.connect()
+
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
     }
 
 

@@ -86,7 +86,7 @@ class FeedAdapter(var listData: MutableList<Feed>) :
         val now = System.currentTimeMillis() / 1000
         val du = now - time
         return if (du < 60) {
-            "$du 分钟前"
+            "$du 秒钟前"
         } else if (du < 60 * 60) {
             "${du / 60} 分钟前"
         } else if (du < 24 * 60 * 60) {
@@ -94,7 +94,6 @@ class FeedAdapter(var listData: MutableList<Feed>) :
         } else {
             "${du / (3600 * 24)} 天前"
         }
-
 
     }
 
