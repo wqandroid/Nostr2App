@@ -3,6 +3,7 @@ package nostr.postr.events
 import fr.acinq.secp256k1.Hex
 import nostr.postr.Utils
 import nostr.postr.toHex
+import nostr.postr.toNpub
 import java.util.*
 
 /**
@@ -50,9 +51,8 @@ class PrivateDmEvent(
      */
     fun plainContent(privKey: ByteArray, pubKey: ByteArray): String? {
 
-
+        val sharedSecret = Utils.getSharedSecret(privKey, pubKey)
         return try {
-            val sharedSecret = Utils.getSharedSecret(privKey, pubKey)
             val retVal = Utils.decrypt(content, sharedSecret)
             // decrypt randomly "succeeds". With the nip18Advertisement prefix we kill two birds
             // with one stone:
@@ -66,7 +66,7 @@ class PrivateDmEvent(
             }
         } catch (e: Exception) {
 //            e.printStackTrace()
-            "error_sharedSecret:${content}"
+            "error_sharedSecret:${pubKey.toNpub()}"
         }
     }
 

@@ -2,12 +2,19 @@ package nostr.postr.core
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import nostr.postr.Client
 import nostr.postr.Relay
 import nostr.postr.events.*
 import java.util.*
 
 abstract class WsViewModel : ViewModel() {
+     val scope = CoroutineScope(Job() + Dispatchers.IO)
+
+    var comDis = CompositeDisposable()
 
     private val clientListener = object : Client.Listener() {
 
@@ -92,5 +99,6 @@ abstract class WsViewModel : ViewModel() {
         super.onCleared()
         wsClient.value.unsubscribe(clientListener)
         wsClient.value.disconnect()
+        comDis.clear()
     }
 }

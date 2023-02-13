@@ -8,23 +8,21 @@ import nostr.postr.*
 import nostr.postr.core.AccountManger
 import nostr.postr.core.WSClient
 import nostr.postr.core.WsViewModel
-import nostr.postr.db.FollowUserKey
-import nostr.postr.db.NostrDB
-import nostr.postr.db.UserProfile
+import nostr.postr.db.*
 import nostr.postr.events.*
 import nostr.postr.ui.feed.Feed
 import java.util.*
 
 class HomeViewModel : WsViewModel() {
 
-    private val scope = CoroutineScope(Job() + Dispatchers.IO)
+
 
     //自己的用户信息
     var pubKey: String = ""
 
     private val mainSubscriptionId = "mainUser_${UUID.randomUUID().toString().substring(0..5)}"
 
-    private val followSubscriptionId="follow_feed${UUID.randomUUID().toString().substring(0..5)}"
+    private val followSubscriptionId = "follow_feed${UUID.randomUUID().toString().substring(0..5)}"
 
     val feedCountLiveData = MutableLiveData<Int>(0)
     val feedLiveData = MutableLiveData<List<Feed>>()
@@ -33,40 +31,63 @@ class HomeViewModel : WsViewModel() {
     private var count = 0
     private var profileList = mutableListOf<String>()
 
-    private val setIds= mutableSetOf<String>()
+    private val setIds = mutableSetOf<String>()
+
+//    private val map = mutableMapOf<String, MutableList<PrivateDmEvent>>()
 
     override fun onRecPrivateDmEvent(subscriptionId: String, event: PrivateDmEvent) {
         super.onRecPrivateDmEvent(subscriptionId, event)
         if (subscriptionId != mainSubscriptionId) return
-        var even = event as PrivateDmEvent
-//                    var pubkeyToUse = event.pubKey
-//                    val recepientPK = event.recipientPubKey
 
-        if (event.pubKey.toHex() == pubKey) {
-//                        Log.e("msg_from", "self --message")
-//                        Log.e(
-//                            "msg_from--->",
-//                            "${subscriptionId}-->\n私信:${
-//                                even.plainContent(
-//                                    AccountManger.getPrivateKey(),
-//                                    even.recipientPubKey!!
-//                                )
-//                            }"
-//                        )
-        } else {
-//                        Log.e(
-//                            "msg_from--->",
-//                            "${subscriptionId}-->\n私信:${
-//                                even.plainContent(
-//                                    AccountManger.getPrivateKey(),
-//                                    even.pubKey
-//                                )
-//                            }"
-//                        )
+        if (event.pubKey.toHex() == pubKey || event.recipientPubKey?.toHex() == pubKey) {
 
+            val isSelf = event.pubKey.toHex() == pubKey
+            val chatRoomID =
+                if (isSelf) {
+                    "${event.recipientPubKey?.toHex()}-${event.pubKey.toHex()}"
+                } else {
+                    "${event.pubKey.toHex()}-${event.recipientPubKey?.toHex()}"
+                }
+
+            val content = if (isSelf) {
+                event.plainContent(
+                    AccountManger.getPrivateKey(),
+                    event.recipientPubKey ?: event.pubKey
+                )
+            } else {
+                event.plainContent(
+                    AccountManger.getPrivateKey(),
+                    event.pubKey
+                )
+            } ?: ""
+
+            val sendTo = if (isSelf) event.recipientPubKey!!.toHex() else event.pubKey.toHex()
+
+            val chatRoom=ChatRoom(roomId = chatRoomID,sendTo,content,event.createdAt)
+                .also {
+                    scope.launch {
+                        NostrDB.getDatabase(MyApplication._instance)
+                            .chatDao().createChatRoom(it)
+                    }
+                }
+
+            val chat = Chat(
+                event.id.toHex(),
+                chatRoomID,
+                content,
+                event.createdAt,
+                false
+            ).let {
+                scope.launch {
+                    NostrDB.getDatabase(MyApplication.getInstance())
+                        .chatDao().insertMsg(it)
+                }
+            }
+
+            Log.e(
+                "msg_room--->", "${chatRoom}:-->私信群组:$chat"
+            )
         }
-//
-
     }
 
     override fun onRecContactListEvent(subscriptionId: String, event: ContactListEvent) {
@@ -85,7 +106,7 @@ class HomeViewModel : WsViewModel() {
 
             event.follows.map { it.pubKeyHex }.also { stringList ->
                 stringList.toMutableList().also {
-                    AccountManger.follows=it
+                    AccountManger.follows = it
                     reqFollowFeed(it)
                 }
             }
@@ -134,7 +155,7 @@ class HomeViewModel : WsViewModel() {
 
             if (!textEvent.isFeed() || subscriptionId != followSubscriptionId) return@launch
 
-            if (setIds.contains(textEvent.id.toHex()))return@launch
+            if (setIds.contains(textEvent.id.toHex())) return@launch
             setIds.add(textEvent.id.toHex())
             var feed = nostr.postr.db.FeedItem(
                 textEvent.id.toString(),
@@ -186,11 +207,13 @@ class HomeViewModel : WsViewModel() {
                 kinds = mutableListOf(3),
                 limit = 1
             ),
-//            JsonFilter(
-//                kinds = mutableListOf(1),//6
-//                limit = 20,
-//                since = System.currentTimeMillis()/1000
-//            ),
+            JsonFilter(
+                kinds = mutableListOf(4),//6
+                authors = mutableListOf(pubKey),
+                since = NostrDB.getDatabase(MyApplication._instance)
+                    .chatDao().getLast()?.createAt ?: (System.currentTimeMillis() / 10000),
+//                tags = map
+            ),
 //            JsonFilter(
 //                authors = listOf(AccountManger.getPublicKey()),
 //                kinds = mutableListOf(1984)
@@ -211,7 +234,7 @@ class HomeViewModel : WsViewModel() {
 //                    tags = map,
                     authors = list,
                     since = NostrDB.getDatabase(MyApplication._instance)
-                        .feedDao().getLast()?.created_at ?: (System.currentTimeMillis() / 1000),
+                        .feedDao().getLast()?.created_at ?: (System.currentTimeMillis() / 10000),
                     limit = 200
                 )
             )

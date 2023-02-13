@@ -6,13 +6,16 @@ import io.reactivex.rxjava3.core.Flowable
 
 
 @Database(
-    entities = [FeedItem::class, UserProfile::class, BlockUser::class, FollowUserKey::class],
+    entities = [FeedItem::class, UserProfile::class, BlockUser::class,
+        Chat::class,ChatRoom::class,
+        FollowUserKey::class],
     version = 1
 )
 abstract class NostrDB : RoomDatabase() {
 
 
     abstract fun feedDao(): FeedDao
+    abstract fun chatDao(): ChatDao
     abstract fun profileDao(): UserProfileDao
 
     abstract fun blockUserDao(): BlockUserDao
@@ -25,7 +28,7 @@ abstract class NostrDB : RoomDatabase() {
         fun getDatabase(context: Context): NostrDB {
             if (appDatabase == null) {
                 synchronized(this) {
-                    appDatabase = Room.databaseBuilder(context, NostrDB::class.java, "nor11.db")
+                    appDatabase = Room.databaseBuilder(context, NostrDB::class.java, "nor12.db")
                         .fallbackToDestructiveMigration()
                         .allowMainThreadQueries()
                         .build()
@@ -34,7 +37,6 @@ abstract class NostrDB : RoomDatabase() {
             return appDatabase!!
         }
     }
-
 
 }
 
@@ -97,6 +99,24 @@ interface FollowUserKeyDao {
 
     @Delete
     suspend fun delete(feed: FollowUserKey): Int
+}
+
+@Dao
+interface ChatDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun createChatRoom(chat: ChatRoom)
+
+    @Query("SELECT * FROM chat ORDER BY createAt DESC LIMIT 1")
+    fun getLast(): Chat?
+    @Query("select * from chat_room")
+    fun getAllChatRoom(): Flowable<List<ChatRoom>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMsg(chat: Chat)
+
+    @Query("select * from chat where roomId=:s")
+    suspend fun getChatGroupMessage(s: String): List<Chat>
+
 }
 
 

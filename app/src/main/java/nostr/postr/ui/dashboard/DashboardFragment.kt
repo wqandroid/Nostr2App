@@ -22,17 +22,18 @@ import nostr.postr.MyApplication
 import nostr.postr.R
 import nostr.postr.core.AccountManger
 import nostr.postr.databinding.FragmentDashboardBinding
+import nostr.postr.db.ChatRoom
 import nostr.postr.db.NostrDB
 import nostr.postr.ui.AppViewModel
 import nostr.postr.ui.user.UserDetailActivity
 
-class DashboardFragment : Fragment(), FollowAdapter.ItemChildClickListener {
+class DashboardFragment : Fragment(), ChatAdapter.ItemChildClickListener {
 
     lateinit var binding: FragmentDashboardBinding
 
 
-    private lateinit var adapter: FollowAdapter
-    private val list = mutableListOf<FollowInfo>()
+    private lateinit var adapter: ChatAdapter
+    private val list = mutableListOf<ChatRoom>()
     private val viewModel by viewModels<DashboardViewModel>()
 
     override fun onCreateView(
@@ -47,36 +48,39 @@ class DashboardFragment : Fragment(), FollowAdapter.ItemChildClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        this.adapter = FollowAdapter(list).also {
+        this.adapter = ChatAdapter(list).also {
             binding.recyclerView.adapter = it
         }
         this.adapter.clickListener = this
         binding.recyclerView.apply {
             this.layoutManager = LinearLayoutManager(requireContext())
         }
-
-        viewModel.followList.observe(viewLifecycleOwner){
+        this.viewModel.chatRoomLiveDat.observe(viewLifecycleOwner) {
             list.clear()
             list.addAll(it)
             adapter.notifyDataSetChanged()
         }
 
-        viewModel.subFollows(AccountManger.getPublicKey())
+        viewModel.followList.observe(viewLifecycleOwner) {
+            binding.tvFollowCount.text = "已关注(${it.count()})"
+        }
 
+        viewModel.subFollows(AccountManger.getPublicKey())
+        viewModel.loadChat()
     }
 
 
-    override fun onClick(feed: FollowInfo, itemView: View) {
+    override fun onDestroy() {
+        super.onDestroy()
+    }
+
+    override fun onClick(feed: ChatRoom, itemView: View) {
         if (itemView.id == R.id.iv_avatar) {
             startActivity(
                 Intent(requireContext(), UserDetailActivity::class.java)
                     .apply {
-                        putExtra("pubkey", feed.pubkey)
+                        putExtra("pubkey", feed.sendTo)
                     })
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
     }
 }

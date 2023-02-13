@@ -23,7 +23,6 @@ import java.util.*
 
 class UserViewModel : WsViewModel() {
 
-    private val scope = CoroutineScope(Job() + Dispatchers.IO)
 
     lateinit var pubKey: String
 

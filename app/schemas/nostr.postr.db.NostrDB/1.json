@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "e7cd95d719e25bedb91da20914cfe281",
+    "identityHash": "e6ebcc544c0942abd9e43d430dcbd4f5",
     "entities": [
       {
         "tableName": "feed_info",
@@ -143,6 +143,88 @@
         "foreignKeys": []
       },
       {
+        "tableName": "chat",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`msgId` TEXT NOT NULL, `roomId` TEXT NOT NULL, `content` TEXT NOT NULL, `createAt` INTEGER NOT NULL, `isRead` INTEGER NOT NULL, PRIMARY KEY(`msgId`))",
+        "fields": [
+          {
+            "fieldPath": "msgId",
+            "columnName": "msgId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "roomId",
+            "columnName": "roomId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "content",
+            "columnName": "content",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createAt",
+            "columnName": "createAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isRead",
+            "columnName": "isRead",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "msgId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "chat_room",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`roomId` TEXT NOT NULL, `sendTo` TEXT NOT NULL, `content` TEXT NOT NULL, `lastUpdate` INTEGER NOT NULL, PRIMARY KEY(`roomId`))",
+        "fields": [
+          {
+            "fieldPath": "roomId",
+            "columnName": "roomId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sendTo",
+            "columnName": "sendTo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "content",
+            "columnName": "content",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastUpdate",
+            "columnName": "lastUpdate",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "roomId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
         "tableName": "follow_user",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pubkey` TEXT NOT NULL, `status` INTEGER NOT NULL, `name` TEXT, PRIMARY KEY(`pubkey`))",
         "fields": [
@@ -178,7 +260,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e7cd95d719e25bedb91da20914cfe281')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e6ebcc544c0942abd9e43d430dcbd4f5')"
     ]
   }
 }
