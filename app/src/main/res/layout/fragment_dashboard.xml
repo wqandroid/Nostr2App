@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         app:navigationIcon="@drawable/baseline_menu_24"
         app:navigationIconTint="?colorOnSurface"
-        app:title="私信"
+        app:title="Private Chat"
         app:titleCentered="true">
 
         <ImageView
@@ -26,12 +26,35 @@
 
     </com.google.android.material.appbar.MaterialToolbar>
 
-    <TextView
-        style="@style/TextAppearance.Material3.TitleLarge"
-        android:id="@+id/tvFollowCount"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
 
+    <TextView
+        android:id="@+id/tvFollowCount"
+        style="@style/TextAppearance.Material3.TitleSmall"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="Follow" />
+
+    <HorizontalScrollView
+        android:id="@+id/hz"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:id="@+id/ll_follow"
+            android:layout_width="64dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="16dp"
+            android:orientation="horizontal" />
+    </HorizontalScrollView>
+
+    <TextView
+        style="@style/TextAppearance.Material3.TitleSmall"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="Chat" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"

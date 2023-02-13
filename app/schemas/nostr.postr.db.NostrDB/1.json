@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "e6ebcc544c0942abd9e43d430dcbd4f5",
+    "identityHash": "bd444928411bf9e503c3a336d1b05461",
     "entities": [
       {
         "tableName": "feed_info",
@@ -144,7 +144,7 @@
       },
       {
         "tableName": "chat",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`msgId` TEXT NOT NULL, `roomId` TEXT NOT NULL, `content` TEXT NOT NULL, `createAt` INTEGER NOT NULL, `isRead` INTEGER NOT NULL, PRIMARY KEY(`msgId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`msgId` TEXT NOT NULL, `roomId` TEXT NOT NULL, `content` TEXT NOT NULL, `createAt` INTEGER NOT NULL, `createPubKey` TEXT NOT NULL, `isRead` INTEGER NOT NULL, PRIMARY KEY(`msgId`))",
         "fields": [
           {
             "fieldPath": "msgId",
@@ -168,6 +168,12 @@
             "fieldPath": "createAt",
             "columnName": "createAt",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createPubKey",
+            "columnName": "createPubKey",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -260,7 +266,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e6ebcc544c0942abd9e43d430dcbd4f5')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bd444928411bf9e503c3a336d1b05461')"
     ]
   }
 }

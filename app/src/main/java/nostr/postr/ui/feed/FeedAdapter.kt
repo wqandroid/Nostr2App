@@ -4,6 +4,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import fr.acinq.secp256k1.Hex
@@ -11,6 +13,7 @@ import nostr.postr.databinding.FragmentFeedItemBinding
 import nostr.postr.db.FeedItem
 import nostr.postr.db.UserProfile
 import nostr.postr.toNpub
+import nostr.postr.util.UIUtils
 import nostr.postr.util.UIUtils.makeGone
 import nostr.postr.util.UIUtils.makeVisibility
 import java.util.regex.Pattern
@@ -20,7 +23,7 @@ data class Feed(val feedItem: FeedItem, val userProfile: UserProfile?) {
     var mentions: List<String>? = null
 }
 
-class FeedAdapter(var listData: MutableList<Feed>) :
+class FeedAdapter() :
     RecyclerView.Adapter<FeedAdapter.FeedViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FeedViewHolder {
 
@@ -30,15 +33,17 @@ class FeedAdapter(var listData: MutableList<Feed>) :
         return FeedViewHolder(binding)
     }
 
+
+
     var clickListener: ItemChildClickListener? = null
 
     val p =
         Pattern.compile("https?:[^:<>\"]*\\/([^:<>\"]*)\\.((png!thumbnail)|(png)|(jpg)|(webp))")
 
     override fun onBindViewHolder(holder: FeedViewHolder, position: Int) {
-        val item: Feed = listData[position]
+        val item: Feed = differ.currentList[position]
         holder.binding.tvContent.text = item.feedItem.content
-        holder.binding.tvTime.text = parseTime(item.feedItem.created_at)
+        holder.binding.tvTime.text = UIUtils.parseTime(item.feedItem.created_at)
 
         if (item.replyTos.isNullOrEmpty()) {
             holder.binding.tvReply.makeGone()
@@ -79,35 +84,33 @@ class FeedAdapter(var listData: MutableList<Feed>) :
         holder.binding.ivAvatar.setOnClickListener {
             clickListener?.onClick(item, it)
         }
+        holder.setIsRecyclable(true)
     }
 
 
-    private fun parseTime(time: Long): String {
-        val now = System.currentTimeMillis() / 1000
-        val du = now - time
-        return if (du < 60) {
-            "$du 秒钟前"
-        } else if (du < 60 * 60) {
-            "${du / 60} 分钟前"
-        } else if (du < 24 * 60 * 60) {
-            "${du / 3600} 小时前"
-        } else {
-            "${du / (3600 * 24)} 天前"
-        }
 
-    }
 
-    fun updateData(list: List<Feed>) {
-        listData.clear()
-        listData.addAll(list)
-        notifyDataSetChanged()
-    }
 
-    override fun getItemCount() = listData.size
+
+    override fun getItemCount() = differ.currentList.size
 
     inner class FeedViewHolder(val binding: FragmentFeedItemBinding) :
         RecyclerView.ViewHolder(binding.root)
 
+
+    private val diffCallBack = object : DiffUtil.ItemCallback<Feed>() {
+        override fun areItemsTheSame(oldItem: Feed, newItem: Feed): Boolean {
+            return oldItem.feedItem.id == newItem.feedItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: Feed, newItem: Feed): Boolean {
+            return oldItem.feedItem.id == newItem.feedItem.id ||
+                    oldItem.feedItem.content == newItem.feedItem.content
+        }
+
+    }
+
+    val differ=AsyncListDiffer(this,diffCallBack)
 
     interface ItemChildClickListener {
         fun onClick(feed: Feed, itemView: View)

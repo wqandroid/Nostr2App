@@ -2,38 +2,27 @@ package nostr.postr.ui.dashboard
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Scheduler
-import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.schedulers.Schedulers
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import nostr.postr.MyApplication
+import com.bumptech.glide.Glide
 import nostr.postr.R
 import nostr.postr.core.AccountManger
 import nostr.postr.databinding.FragmentDashboardBinding
 import nostr.postr.db.ChatRoom
-import nostr.postr.db.NostrDB
-import nostr.postr.ui.AppViewModel
 import nostr.postr.ui.user.UserDetailActivity
+import nostr.postr.util.UIUtils.makeGone
+import nostr.postr.util.UIUtils.makeVisibility
 
 class DashboardFragment : Fragment(), ChatAdapter.ItemChildClickListener {
 
     lateinit var binding: FragmentDashboardBinding
 
-
-    private lateinit var adapter: ChatAdapter
-    private val list = mutableListOf<ChatRoom>()
+    private val chatAdapter by lazy { ChatAdapter() }
     private val viewModel by viewModels<DashboardViewModel>()
 
     override fun onCreateView(
@@ -48,21 +37,42 @@ class DashboardFragment : Fragment(), ChatAdapter.ItemChildClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        this.adapter = ChatAdapter(list).also {
-            binding.recyclerView.adapter = it
-        }
-        this.adapter.clickListener = this
         binding.recyclerView.apply {
             this.layoutManager = LinearLayoutManager(requireContext())
+            this.adapter = chatAdapter.also {
+                it.clickListener = this@DashboardFragment
+            }
         }
         this.viewModel.chatRoomLiveDat.observe(viewLifecycleOwner) {
-            list.clear()
-            list.addAll(it)
-            adapter.notifyDataSetChanged()
+            it.sortedByDescending { it.lastUpdate }
+            chatAdapter.differ.submitList(it)
         }
 
         viewModel.followList.observe(viewLifecycleOwner) {
             binding.tvFollowCount.text = "已关注(${it.count()})"
+            if (it.isNotEmpty()) {
+                binding.hz.makeVisibility()
+                binding.llFollow.removeAllViews()
+                it.sortedByDescending { it.userProfile?.picture }.forEach { follow ->
+                    val root = LayoutInflater.from(requireContext())
+                        .inflate(R.layout.view_avatar_follow, null)
+                    val imageView = root.findViewById<ImageView>(R.id.iv_avatar)
+                    binding.llFollow.addView(root)
+                    Glide.with(this).load(follow.userProfile?.picture)
+                        .into(imageView)
+
+                    imageView.setOnClickListener {
+                        startActivity(Intent(requireContext(), UserDetailActivity::class.java)
+                            .apply {
+                                putExtra("pubkey", follow.pubkey)
+                            })
+                    }
+                }
+
+
+            } else {
+                binding.hz.makeGone()
+            }
         }
 
         viewModel.subFollows(AccountManger.getPublicKey())
@@ -70,17 +80,16 @@ class DashboardFragment : Fragment(), ChatAdapter.ItemChildClickListener {
     }
 
 
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
-    override fun onClick(feed: ChatRoom, itemView: View) {
-        if (itemView.id == R.id.iv_avatar) {
-            startActivity(
-                Intent(requireContext(), UserDetailActivity::class.java)
-                    .apply {
-                        putExtra("pubkey", feed.sendTo)
-                    })
+    override fun onClick(chatRoom: ChatRoom, itemView: View) {
+        if (itemView.id == R.id.cl_root) {
+            startActivity(Intent(requireContext(), ChatActivity::class.java).apply {
+                putExtra("chat_room_id", chatRoom.roomId)
+            })
+        }else if (itemView.id == R.id.iv_avatar){
+            startActivity(Intent(requireContext(), UserDetailActivity::class.java)
+                .apply {
+                    putExtra("pubkey", chatRoom.sendTo)
+                })
         }
     }
 }

@@ -32,16 +32,15 @@ class FeedFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter= FeedAdapter(mutableListOf())
+        adapter= FeedAdapter()
 
         binding.rvFeed.adapter=adapter
         binding.rvFeed.layoutManager=LinearLayoutManager(requireContext())
         binding.rvFeed.hasFixedSize()
 
         feedViewModel.feedLiveData.observe(viewLifecycleOwner){
-          adapter.updateData(it)
+          adapter.differ.submitList(it)
         }
-
         feedViewModel.loadFeedFromDB()
 
     }

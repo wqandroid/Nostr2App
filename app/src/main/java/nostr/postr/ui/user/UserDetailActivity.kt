@@ -35,8 +35,7 @@ class UserDetailActivity : BaseAct() {
 
     private val userViewModel by viewModels<UserViewModel>()
 
-
-    private lateinit var adapter: FeedAdapter
+    private  val adapter by lazy { FeedAdapter() }
     private var list = mutableListOf<Feed>()
     private val set = mutableSetOf<String>()
 
@@ -48,7 +47,6 @@ class UserDetailActivity : BaseAct() {
         binding = ActivityUserDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
-//        window.statusBarColor = getColor(R.color.md_theme_primary)
 
         pubkey = intent.getStringExtra("pubkey")!!
 
@@ -60,7 +58,6 @@ class UserDetailActivity : BaseAct() {
             showUser(it)
         }
 
-        adapter = FeedAdapter(mutableListOf())
 
         binding.rvFeed.adapter = adapter
         binding.rvFeed.layoutManager = LinearLayoutManager(this)
@@ -78,11 +75,13 @@ class UserDetailActivity : BaseAct() {
                 set.add(it.feedItem.id)
                 list.add(it)
                 list.sortByDescending { it.feedItem.created_at }
-                adapter.updateData(list)
+                adapter.differ.submitList(mutableListOf<Feed>().apply {
+                    this.addAll(list)
+                }) {
+                    binding.rvFeed.scrollToPosition(0)
+                }
                 binding.progressHorizontal.makeGone()
             }
-
-
         }
 
         binding.toolbar.setNavigationOnClickListener {

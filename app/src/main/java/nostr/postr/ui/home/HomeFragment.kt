@@ -28,7 +28,7 @@ class HomeFragment : Fragment(), FeedAdapter.ItemChildClickListener {
     private lateinit var binding: FragmentFeedBinding
     private val feedViewModel by viewModels<HomeViewModel>()
 
-    private lateinit var adapter: FeedAdapter
+    private  val adapter by lazy { FeedAdapter() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,14 +43,13 @@ class HomeFragment : Fragment(), FeedAdapter.ItemChildClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = FeedAdapter(mutableListOf())
 
         binding.rvFeed.adapter = adapter
         binding.rvFeed.layoutManager = LinearLayoutManager(requireContext())
         binding.rvFeed.hasFixedSize()
 
         feedViewModel.feedLiveData.observe(viewLifecycleOwner) {
-            adapter.updateData(it)
+            adapter.differ.submitList(it)
         }
 //        feedViewModel.loadBlockUser()
         feedViewModel.loadFeedFromDB()

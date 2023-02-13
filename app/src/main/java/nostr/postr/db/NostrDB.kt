@@ -7,7 +7,7 @@ import io.reactivex.rxjava3.core.Flowable
 
 @Database(
     entities = [FeedItem::class, UserProfile::class, BlockUser::class,
-        Chat::class,ChatRoom::class,
+        ChatMessage::class,ChatRoom::class,
         FollowUserKey::class],
     version = 1
 )
@@ -28,7 +28,7 @@ abstract class NostrDB : RoomDatabase() {
         fun getDatabase(context: Context): NostrDB {
             if (appDatabase == null) {
                 synchronized(this) {
-                    appDatabase = Room.databaseBuilder(context, NostrDB::class.java, "nor12.db")
+                    appDatabase = Room.databaseBuilder(context, NostrDB::class.java, "nor14.db")
                         .fallbackToDestructiveMigration()
                         .allowMainThreadQueries()
                         .build()
@@ -107,15 +107,15 @@ interface ChatDao {
     suspend fun createChatRoom(chat: ChatRoom)
 
     @Query("SELECT * FROM chat ORDER BY createAt DESC LIMIT 1")
-    fun getLast(): Chat?
+    fun getLast(): ChatMessage?
     @Query("select * from chat_room")
     fun getAllChatRoom(): Flowable<List<ChatRoom>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMsg(chat: Chat)
+    suspend fun insertMsg(chat: ChatMessage)
 
     @Query("select * from chat where roomId=:s")
-    suspend fun getChatGroupMessage(s: String): List<Chat>
+     fun getChatGroupMessage(s: String): Flowable<List<ChatMessage>>
 
 }
 

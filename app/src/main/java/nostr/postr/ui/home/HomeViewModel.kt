@@ -2,11 +2,9 @@ package nostr.postr.ui.home
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.*
 import nostr.postr.*
 import nostr.postr.core.AccountManger
-import nostr.postr.core.WSClient
 import nostr.postr.core.WsViewModel
 import nostr.postr.db.*
 import nostr.postr.events.*
@@ -14,7 +12,6 @@ import nostr.postr.ui.feed.Feed
 import java.util.*
 
 class HomeViewModel : WsViewModel() {
-
 
 
     //自己的用户信息
@@ -59,11 +56,11 @@ class HomeViewModel : WsViewModel() {
                     AccountManger.getPrivateKey(),
                     event.pubKey
                 )
-            } ?: ""
+            } ?: "xxxxxxxxxxxxx"
 
             val sendTo = if (isSelf) event.recipientPubKey!!.toHex() else event.pubKey.toHex()
 
-            val chatRoom=ChatRoom(roomId = chatRoomID,sendTo,content,event.createdAt)
+            val chatRoom = ChatRoom(roomId = chatRoomID, sendTo, content, event.createdAt)
                 .also {
                     scope.launch {
                         NostrDB.getDatabase(MyApplication._instance)
@@ -71,21 +68,27 @@ class HomeViewModel : WsViewModel() {
                     }
                 }
 
-            val chat = Chat(
+            ChatMessage(
                 event.id.toHex(),
                 chatRoomID,
                 content,
                 event.createdAt,
+                if (isSelf) pubKey else sendTo,
                 false
             ).let {
                 scope.launch {
                     NostrDB.getDatabase(MyApplication.getInstance())
                         .chatDao().insertMsg(it)
                 }
+                Log.e(
+                    "msg_room--->", "${chatRoom.roomId}\n:-->私信群组:$isSelf   ${it.content}"
+                )
             }
 
+
+        } else {
             Log.e(
-                "msg_room--->", "${chatRoom}:-->私信群组:$chat"
+                "msg_room--->", "非我的消息？？??${event.toJson()}"
             )
         }
     }
@@ -166,14 +169,13 @@ class HomeViewModel : WsViewModel() {
             NostrDB.getDatabase(MyApplication.getInstance())
                 .feedDao().insertFeed(feed)
             count++
-//                        if (count % 20 == 0) {
-//                            loadFeedFromDB()
-//                        }
-            Log.e("TextNoteEvent--->$count", textEvent.toJson())
-
-            withContext(Dispatchers.Main) {
-                feedCountLiveData.value = count
+            if (count % 2 == 0) {
+                loadFeedFromDB()
             }
+            Log.e("TextNoteEvent--->$count", textEvent.toJson())
+//            withContext(Dispatchers.Main) {
+//                feedCountLiveData.value = count
+//            }
             val userProfile = NostrDB.getDatabase(MyApplication._instance).profileDao()
                 .getUserInfo(feed.pubkey)
             if (userProfile == null) {
@@ -210,8 +212,8 @@ class HomeViewModel : WsViewModel() {
             JsonFilter(
                 kinds = mutableListOf(4),//6
                 authors = mutableListOf(pubKey),
-                since = NostrDB.getDatabase(MyApplication._instance)
-                    .chatDao().getLast()?.createAt ?: (System.currentTimeMillis() / 10000),
+//                since = NostrDB.getDatabase(MyApplication._instance)
+//                    .chatDao().getLast()?.createAt ?: (System.currentTimeMillis() / 10000),
 //                tags = map
             ),
 //            JsonFilter(

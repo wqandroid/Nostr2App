@@ -17,6 +17,10 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:theme="@style/AppTheme"
+            android:name=".ui.dashboard.ChatActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.feed.PublishActivity"
             android:exported="false" />
         <activity
@@ -27,8 +31,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/AppTheme.TransparentStatusBar"
-            >
+            android:theme="@style/AppTheme.TransparentStatusBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

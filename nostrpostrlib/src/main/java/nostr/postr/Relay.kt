@@ -4,6 +4,7 @@ import com.google.gson.JsonElement
 import nostr.postr.events.ContactListEvent
 import nostr.postr.events.Event
 import nostr.postr.events.MetadataEvent
+import nostr.postr.events.PrivateDmEvent
 import okhttp3.*
 import java.util.concurrent.ConcurrentSkipListSet
 import java.util.concurrent.TimeUnit
@@ -119,7 +120,7 @@ class Relay(
             when (type) {
                 "EVENT" -> {
                     val event = Event.fromJson(msg[2], Client.lenient)
-                    if (event is MetadataEvent) {
+                    if (event is PrivateDmEvent) {
                         println("------------------")
                         println(text)
                         println("------------------")
