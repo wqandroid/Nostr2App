@@ -18,7 +18,7 @@ import nostr.postr.ui.user.UserDetailActivity
 import nostr.postr.util.UIUtils.makeGone
 import nostr.postr.util.UIUtils.makeVisibility
 
-class DashboardFragment : Fragment(), ChatAdapter.ItemChildClickListener {
+class PrivateChatFragment : Fragment(), ChatAdapter.ItemChildClickListener {
 
     lateinit var binding: FragmentDashboardBinding
 
@@ -40,7 +40,7 @@ class DashboardFragment : Fragment(), ChatAdapter.ItemChildClickListener {
         binding.recyclerView.apply {
             this.layoutManager = LinearLayoutManager(requireContext())
             this.adapter = chatAdapter.also {
-                it.clickListener = this@DashboardFragment
+                it.clickListener = this@PrivateChatFragment
             }
         }
         this.viewModel.chatRoomLiveDat.observe(viewLifecycleOwner) {

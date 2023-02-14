@@ -2,6 +2,9 @@ package nostr.postr.ui.home
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.*
 import nostr.postr.*
 import nostr.postr.core.AccountManger
@@ -34,8 +37,7 @@ class HomeViewModel : WsViewModel() {
 
     override fun onRecPrivateDmEvent(subscriptionId: String, event: PrivateDmEvent) {
         super.onRecPrivateDmEvent(subscriptionId, event)
-        if (subscriptionId != mainSubscriptionId) return
-
+//        if (subscriptionId != mainSubscriptionId) return
         if (event.pubKey.toHex() == pubKey || event.recipientPubKey?.toHex() == pubKey) {
 
             val isSelf = event.pubKey.toHex() == pubKey
@@ -87,9 +89,9 @@ class HomeViewModel : WsViewModel() {
 
 
         } else {
-            Log.e(
-                "msg_room--->", "非我的消息？？??${event.toJson()}"
-            )
+//            Log.e(
+//                "msg_room--->", "非我的消息？？??${event.toJson()}"
+//            )
         }
     }
 
@@ -97,7 +99,6 @@ class HomeViewModel : WsViewModel() {
         super.onRecContactListEvent(subscriptionId, event)
         if (subscriptionId != mainSubscriptionId) return
         scope.launch {
-
             Log.e("onRecContactListEvent--->", event.toJson())
             event.follows.forEach {
                 NostrDB.getDatabase(MyApplication._instance)
@@ -156,7 +157,7 @@ class HomeViewModel : WsViewModel() {
 //                            )
 //                        ) return@launch
 
-            if (!textEvent.isFeed() || subscriptionId != followSubscriptionId) return@launch
+//            if (!textEvent.isFeed() || subscriptionId != followSubscriptionId) return@launch
 
             if (setIds.contains(textEvent.id.toHex())) return@launch
             setIds.add(textEvent.id.toHex())
@@ -224,6 +225,25 @@ class HomeViewModel : WsViewModel() {
         wsClient.value.requestAndWatch(subscriptionId = mainSubscriptionId, filters = filter)
     }
 
+     fun subChat() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val list = NostrDB.getDatabase(MyApplication._instance)
+                .chatDao().getTotalChatRoom().map {
+                    it.sendTo
+                }
+            wsClient.value.requestAndWatch(
+                subscriptionId = "req_chat_${getRand5()}", filters = mutableListOf(
+                    JsonFilter(
+                        kinds = mutableListOf(4),//6
+                        authors =list,
+                    )
+                )
+            )
+        }
+
+    }
+
+
     private fun reqFollowFeed(list: MutableList<String>) {
 //        val map = mutableMapOf<String, List<String>>()
 //        map["p"] = list
@@ -235,8 +255,8 @@ class HomeViewModel : WsViewModel() {
                     kinds = listOf(TextNoteEvent.kind),
 //                    tags = map,
                     authors = list,
-                    since = NostrDB.getDatabase(MyApplication._instance)
-                        .feedDao().getLast()?.created_at ?: (System.currentTimeMillis() / 10000),
+//                    since = NostrDB.getDatabase(MyApplication._instance)
+//                        .feedDao().getLast()?.created_at ?: (System.currentTimeMillis() / 10000),
                     limit = 200
                 )
             )
@@ -293,6 +313,7 @@ class HomeViewModel : WsViewModel() {
 //            reqProfile()
         }
     }
+
 
     override fun onCleared() {
         wsClient.value.close(mainSubscriptionId)

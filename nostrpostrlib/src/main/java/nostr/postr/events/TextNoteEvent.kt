@@ -27,7 +27,7 @@ class TextNoteEvent(
     }
 
     fun isFeed():Boolean{
-        return replyTos.isNullOrEmpty() && mentions.isNullOrEmpty()
+        return mentions.isNullOrEmpty()
     }
 
 

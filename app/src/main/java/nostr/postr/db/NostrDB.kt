@@ -111,6 +111,8 @@ interface ChatDao {
     @Query("select * from chat_room")
     fun getAllChatRoom(): Flowable<List<ChatRoom>>
 
+    @Query("select * from chat_room")
+    suspend fun getTotalChatRoom(): List<ChatRoom>
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMsg(chat: ChatMessage)
 

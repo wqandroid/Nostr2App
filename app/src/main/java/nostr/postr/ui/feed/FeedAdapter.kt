@@ -18,9 +18,25 @@ import nostr.postr.util.UIUtils.makeGone
 import nostr.postr.util.UIUtils.makeVisibility
 import java.util.regex.Pattern
 
+
 data class Feed(val feedItem: FeedItem, val userProfile: UserProfile?) {
+
+    val imageExtension = Pattern.compile("(.*/)*.+\\.(png|jpg|gif|bmp|jpeg|webp|svg)$")
+    val videoExtension = Pattern.compile("(.*/)*.+\\.(mp4|avi|wmv|mpg|amv|webm)$")
+
+
     var replyTos: List<String>? = null
     var mentions: List<String>? = null
+
+    fun findImageUrl(): String? {
+        val m = imageExtension.matcher(feedItem.content)
+        val m2 = videoExtension.matcher(feedItem.content)
+        if (m.find() || m2.find()) {
+           return m.group()
+        }
+        return null
+    }
+
 }
 
 class FeedAdapter() :
@@ -34,11 +50,8 @@ class FeedAdapter() :
     }
 
 
-
     var clickListener: ItemChildClickListener? = null
 
-    val p =
-        Pattern.compile("https?:[^:<>\"]*\\/([^:<>\"]*)\\.((png!thumbnail)|(png)|(jpg)|(webp))")
 
     override fun onBindViewHolder(holder: FeedViewHolder, position: Int) {
         val item: Feed = differ.currentList[position]
@@ -50,6 +63,9 @@ class FeedAdapter() :
         } else {
             holder.binding.tvReply.makeVisibility()
             holder.binding.tvReply.text = "@reply${item.replyTos!![0]}"
+            holder.binding.tvReply.setOnClickListener {
+                clickListener?.onClick(item, it)
+            }
         }
 
         if (item.userProfile == null) {
@@ -67,15 +83,17 @@ class FeedAdapter() :
             holder.binding.ivAvatar
         )
 
-        val m = p.matcher(item.feedItem.content)
-        if (m.find()) {
+        if (item.findImageUrl().isNullOrEmpty()) {
+            holder.binding.ivContentImg.visibility = View.GONE
+        } else {
 //            Log.e("matches", "--->${m.group()}---${item.feedItem.content}")
             holder.binding.ivContentImg.visibility = View.VISIBLE
-            Glide.with(holder.binding.ivAvatar).load(m.group()).into(
+            Glide.with(holder.binding.ivAvatar).load(item.findImageUrl()!!).into(
                 holder.binding.ivContentImg
             )
-        } else {
-            holder.binding.ivContentImg.visibility = View.GONE
+            holder.binding.ivContentImg.setOnClickListener {
+                clickListener?.onClick(item,it)
+            }
         }
 
         holder.binding.ivMore.setOnClickListener {
@@ -86,10 +104,6 @@ class FeedAdapter() :
         }
         holder.setIsRecyclable(true)
     }
-
-
-
-
 
 
     override fun getItemCount() = differ.currentList.size
@@ -104,13 +118,12 @@ class FeedAdapter() :
         }
 
         override fun areContentsTheSame(oldItem: Feed, newItem: Feed): Boolean {
-            return oldItem.feedItem.id == newItem.feedItem.id ||
-                    oldItem.feedItem.content == newItem.feedItem.content
+            return oldItem.feedItem.content == newItem.feedItem.content
         }
 
     }
 
-    val differ=AsyncListDiffer(this,diffCallBack)
+    val differ = AsyncListDiffer(this, diffCallBack)
 
     interface ItemChildClickListener {
         fun onClick(feed: Feed, itemView: View)
