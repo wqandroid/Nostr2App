@@ -29,11 +29,11 @@ class ChatAdapter :
         val item: ChatRoom = differ.currentList[position]
 
         holder.binding.tvName.text =
-            if (item.profile == null) item.roomId else item.profile?.bestName()
+            if (item.profile == null) item.roomId.substring(0,8) else item.profile?.bestName()
 
         holder.binding.tvContent.text = item.content
 
-        Glide.with(holder.binding.ivAvatar).load(item.profile?.picture).into(
+        Glide.with(holder.binding.ivAvatar).load(item.getUserAvatar()).into(
             holder.binding.ivAvatar
         )
 

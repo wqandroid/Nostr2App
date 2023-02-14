@@ -44,12 +44,12 @@ abstract class WsViewModel : ViewModel() {
         }
 
         override fun onError(error: Error, subscriptionId: String, relay: Relay) {
-//            Log.e("ERROR", "Relay ${relay.url}: ${error.message}")
+            Log.e("RELAY", "onError: Relay ${relay.url}: ${error.message}")
             onRecError(error, subscriptionId, relay)
         }
 
         override fun onRelayStateChange(type: Relay.Type, relay: Relay) {
-            Log.d(
+            Log.e(
                 "RELAY", "Relay ${relay.url} ${
                     when (type) {
                         Relay.Type.CONNECT -> "connected."
@@ -98,7 +98,9 @@ abstract class WsViewModel : ViewModel() {
     override fun onCleared() {
         super.onCleared()
         wsClient.value.unsubscribe(clientListener)
-        wsClient.value.disconnect()
+//        wsClient.value.disconnect()
         comDis.clear()
+        Log.e(
+            "RELAY","手动------------》disconnect")
     }
 }

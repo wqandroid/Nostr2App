@@ -100,11 +100,11 @@ class Relay(
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-//                synchronized(listeners) {
-//                    listeners.forEach {
-//                        it.onError(Error("WebSocket Failure", t), subscriptionId, this@Relay)
-//                    }
-//                }
+                synchronized(listeners) {
+                    listeners.forEach {
+                        it.onError(Error("WebSocket Failure", t), "justConnection", this@Relay)
+                    }
+                }
             }
         }
         socket = httpClient.newWebSocket(request, listener)
@@ -154,10 +154,10 @@ class Relay(
                 }
             }
         } catch (t: Throwable) {
+            t.printStackTrace()
             text.chunked(2000) { chunked ->
                 listeners.forEach {
                     it.onError(
-
                         Error("Problem with $chunked"),
                         subscriptionId,
                         this@Relay

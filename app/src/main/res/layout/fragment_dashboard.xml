@@ -50,6 +50,7 @@
     </HorizontalScrollView>
 
     <TextView
+        android:id="@+id/tv_title_chat"
         style="@style/TextAppearance.Material3.TitleSmall"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

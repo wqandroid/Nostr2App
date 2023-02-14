@@ -66,7 +66,7 @@ class PrivateDmEvent(
             }
         } catch (e: Exception) {
 //            e.printStackTrace()
-            "error_sharedSecret:${pubKey.toNpub()}"
+           null
         }
     }
 

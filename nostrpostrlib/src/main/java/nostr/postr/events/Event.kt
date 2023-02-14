@@ -39,6 +39,9 @@ open class Event(
         }
     }
 
+
+
+
     class EventDeserializer : JsonDeserializer<Event> {
         override fun deserialize(
             json: JsonElement,

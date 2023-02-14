@@ -1,33 +1,40 @@
 package nostr.postr.ui.dashboard
 
 import android.util.Log
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import fr.acinq.secp256k1.Hex
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import nostr.postr.JsonFilter
-import nostr.postr.MyApplication
+import nostr.postr.*
+import nostr.postr.core.AccountManger
 import nostr.postr.core.WsViewModel
+import nostr.postr.db.ChatMessage
 import nostr.postr.db.ChatRoom
 import nostr.postr.db.NostrDB
 import nostr.postr.db.UserProfile
 import nostr.postr.events.ContactListEvent
 import nostr.postr.events.MetadataEvent
-import nostr.postr.toHex
+import nostr.postr.events.PrivateDmEvent
 import java.util.*
 
-class DashboardViewModel : WsViewModel() {
+class PrivateChatViewModel : WsViewModel() {
 
     val followList = MutableLiveData<List<FollowInfo>>()
 
     val chatRoomLiveDat = MutableLiveData<List<ChatRoom>>()
 
     var mainSubscriptionId: String = "Follow_list_${getRand5()}"
+
+
+    override fun onOk(relay: Relay) {
+        super.onOk(relay)
+        Log.e("send_msg", "send_ok${relay.url}")
+    }
+
     override fun onRecContactListEvent(subscriptionId: String, event: ContactListEvent) {
         super.onRecContactListEvent(subscriptionId, event)
 
@@ -118,6 +125,34 @@ class DashboardViewModel : WsViewModel() {
         )
 
     }
+
+
+    fun sendChat(content: String, pubKey: String, chatRoomID: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val event =
+                PrivateDmEvent.create(
+                    Hex.decode(pubKey), content, AccountManger.getPrivateKey(),
+                    Date().time / 1000,
+                    Hex.decode(pubKey),
+                    false
+                )
+            wsClient.value.send(event).also {
+                ChatMessage(
+                    event.id.toHex(),
+                    chatRoomID,
+                    content,
+                    event.createdAt,
+                    AccountManger.getPublicKey(),
+                    isRead = true,
+                    success = false,
+                ).also {
+                    NostrDB.getDatabase(MyApplication._instance)
+                        .chatDao().insertMsg(it)
+                }
+            }
+        }
+    }
+
 
     private fun reqProfile(list: List<String>) {
         viewModelScope.launch {

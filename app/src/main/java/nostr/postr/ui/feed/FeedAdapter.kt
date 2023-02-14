@@ -1,40 +1,51 @@
 package nostr.postr.ui.feed
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.text.buildSpannedString
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import fr.acinq.secp256k1.Hex
+import nostr.postr.MyApplication
+import nostr.postr.R
 import nostr.postr.databinding.FragmentFeedItemBinding
 import nostr.postr.db.FeedItem
 import nostr.postr.db.UserProfile
 import nostr.postr.toNpub
+import nostr.postr.ui.user.UserDetailActivity
 import nostr.postr.util.UIUtils
 import nostr.postr.util.UIUtils.makeGone
 import nostr.postr.util.UIUtils.makeVisibility
+import nostr.postr.util.buildSpannableString
 import java.util.regex.Pattern
+
+
+
+val imageExtension: Pattern = Pattern.compile("(.*/)*.+\\.(png|jpg|gif|bmp|jpeg|webp|svg)$")
+val videoExtension: Pattern = Pattern.compile("(.*/)*.+\\.(mp4|avi|wmv|mpg|amv|webm)$")
 
 
 data class Feed(val feedItem: FeedItem, val userProfile: UserProfile?) {
 
-    val imageExtension = Pattern.compile("(.*/)*.+\\.(png|jpg|gif|bmp|jpeg|webp|svg)$")
-    val videoExtension = Pattern.compile("(.*/)*.+\\.(mp4|avi|wmv|mpg|amv|webm)$")
-
-
-    var replyTos: List<String>? = null
-    var mentions: List<String>? = null
-
     fun findImageUrl(): String? {
         val m = imageExtension.matcher(feedItem.content)
         val m2 = videoExtension.matcher(feedItem.content)
-        if (m.find() || m2.find()) {
-           return m.group()
+        if (m.find()) {
+            return m.group()
+        }
+        if (m2.find()) {
+            return m2.group()
         }
         return null
+    }
+
+    fun getUserAvatar(): String {
+        return userProfile?.picture ?: "https://robohash.org/${feedItem.pubkey}.png"
     }
 
 }
@@ -53,18 +64,34 @@ class FeedAdapter() :
     var clickListener: ItemChildClickListener? = null
 
 
+
+
     override fun onBindViewHolder(holder: FeedViewHolder, position: Int) {
         val item: Feed = differ.currentList[position]
         holder.binding.tvContent.text = item.feedItem.content
         holder.binding.tvTime.text = UIUtils.parseTime(item.feedItem.created_at)
 
-        if (item.replyTos.isNullOrEmpty()) {
+        if (item.feedItem.getReplyTos().isNullOrEmpty()) {
             holder.binding.tvReply.makeGone()
         } else {
+
             holder.binding.tvReply.makeVisibility()
-            holder.binding.tvReply.text = "@reply${item.replyTos!![0]}"
-            holder.binding.tvReply.setOnClickListener {
-                clickListener?.onClick(item, it)
+            holder.binding.tvReply.buildSpannableString {
+                addText("reply"){
+                    setColor(MyApplication._instance.getColor(R.color.md_theme_primary))
+                }
+                item.feedItem.getReplyTos().forEach { key->
+                    addText("@${key.substring(0,6)}"){
+                        setColor(MyApplication._instance.getColor(R.color.md_theme_primary))
+                        onClick {
+                            holder.itemView.context.startActivity(
+                                Intent(holder.itemView.context,UserDetailActivity::class.java).apply {
+                                    putExtra("pubkey",key)
+                                }
+                            )
+                        }
+                    }
+                }
             }
         }
 
@@ -79,9 +106,10 @@ class FeedAdapter() :
         }
 
 
-        Glide.with(holder.binding.ivAvatar).load(item.userProfile?.picture).into(
-            holder.binding.ivAvatar
-        )
+        Glide.with(holder.binding.ivAvatar).load(item.getUserAvatar())
+            .into(
+                holder.binding.ivAvatar
+            )
 
         if (item.findImageUrl().isNullOrEmpty()) {
             holder.binding.ivContentImg.visibility = View.GONE
@@ -92,7 +120,7 @@ class FeedAdapter() :
                 holder.binding.ivContentImg
             )
             holder.binding.ivContentImg.setOnClickListener {
-                clickListener?.onClick(item,it)
+                clickListener?.onClick(item, it)
             }
         }
 
@@ -119,6 +147,9 @@ class FeedAdapter() :
 
         override fun areContentsTheSame(oldItem: Feed, newItem: Feed): Boolean {
             return oldItem.feedItem.content == newItem.feedItem.content
+                    || oldItem.feedItem.getReplyTos() == newItem.feedItem.getReplyTos()
+                    || oldItem.feedItem.getMentions() == newItem.feedItem.getMentions()
+
         }
 
     }

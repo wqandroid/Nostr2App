@@ -11,7 +11,8 @@ class ChatMessage(
     val content: String,
     val createAt: Long,
     val createPubKey: String,
-    val isRead: Boolean
+    val isRead: Boolean,
+    val success: Boolean = true
 )
 
 @Entity("chat_room")
@@ -38,5 +39,9 @@ class ChatRoom(
         return roomId.hashCode()
     }
 
+
+    fun getUserAvatar(): String {
+        return profile?.picture ?: "https://robohash.org/${sendTo}.png"
+    }
 
 }

@@ -28,7 +28,7 @@ abstract class NostrDB : RoomDatabase() {
         fun getDatabase(context: Context): NostrDB {
             if (appDatabase == null) {
                 synchronized(this) {
-                    appDatabase = Room.databaseBuilder(context, NostrDB::class.java, "nor14.db")
+                    appDatabase = Room.databaseBuilder(context, NostrDB::class.java, "nor18.db")
                         .fallbackToDestructiveMigration()
                         .allowMainThreadQueries()
                         .build()

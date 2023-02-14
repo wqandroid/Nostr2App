@@ -3,7 +3,9 @@ package nostr.postr.ui.dashboard
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import nostr.postr.R
 import nostr.postr.core.AccountManger
@@ -11,6 +13,8 @@ import nostr.postr.databinding.ItemChatReceiveBinding
 import nostr.postr.databinding.ItemChatToBinding
 import nostr.postr.db.ChatMessage
 import nostr.postr.util.UIUtils
+import nostr.postr.util.UIUtils.makeGone
+import nostr.postr.util.UIUtils.makeVisibility
 
 class ChatMsgAdapter(
     val list: MutableList<ChatMessage>,
@@ -31,9 +35,28 @@ class ChatMsgAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        holder.itemView.findViewById<TextView>(R.id.tv_content).text = list[position].content
-        holder.itemView.findViewById<TextView>(R.id.tv_time).text =
-        UIUtils.parseTime(list[position].createAt)
+
+        list[position].apply {
+            holder.itemView.findViewById<TextView>(R.id.tv_content).text = content
+            holder.itemView.findViewById<TextView>(R.id.tv_time).text =
+                UIUtils.parseTime(createAt)
+            //send
+            if (createPubKey == pubKey) {
+                if (!success) {
+                    if (System.currentTimeMillis() / 1000 - createAt < 60) {
+                        holder.itemView.findViewById<ImageView>(R.id.iv_send_error).makeGone()
+                        holder.itemView.findViewById<ImageView>(R.id.pb_send).makeVisibility()
+                    } else {
+                        holder.itemView.findViewById<ImageView>(R.id.iv_send_error).makeVisibility()
+                        holder.itemView.findViewById<ImageView>(R.id.pb_send).makeGone()
+                    }
+                } else {
+                    holder.itemView.findViewById<ImageView>(R.id.iv_send_error).makeGone()
+                    holder.itemView.findViewById<ImageView>(R.id.pb_send).makeGone()
+                }
+            }
+
+        }
 
     }
 

@@ -10,9 +10,11 @@ class TextNoteEvent(
     tags: List<List<String>>,
     content: String,
     sig: ByteArray
-): Event(id, pubKey, createdAt, kind, tags, content, sig) {
-    @Transient val replyTos: List<String>
-    @Transient val mentions: List<String>
+) : Event(id, pubKey, createdAt, kind, tags, content, sig) {
+    @Transient
+    val replyTos: List<String>
+    @Transient
+    val mentions: List<String>
 
     init {
         replyTos = tags.filter { it.firstOrNull() == "e" }.mapNotNull { it.getOrNull(1) }
@@ -22,19 +24,28 @@ class TextNoteEvent(
         //回复人的信息
     }
 
-    fun isReply():Boolean{
+    fun isReply(): Boolean {
         return replyTos.isNotEmpty()
     }
 
-    fun isFeed():Boolean{
+    fun isFeed(): Boolean {
         return mentions.isNullOrEmpty()
     }
 
+    fun tag2JsonString(): String {
+        return gson.toJson(tags)
+    }
 
     companion object {
         const val kind = 1
 
-        fun create(msg: String, replyTos: List<String>?, mentions: List<String>?, privateKey: ByteArray, createdAt: Long = Date().time / 1000): TextNoteEvent {
+        fun create(
+            msg: String,
+            replyTos: List<String>?,
+            mentions: List<String>?,
+            privateKey: ByteArray,
+            createdAt: Long = Date().time / 1000
+        ): TextNoteEvent {
             val pubKey = Utils.pubkeyCreate(privateKey)
             val tags = mutableListOf<List<String>>()
             replyTos?.forEach {

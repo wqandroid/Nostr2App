@@ -58,9 +58,9 @@ class HomeViewModel : WsViewModel() {
                     AccountManger.getPrivateKey(),
                     event.pubKey
                 )
-            } ?: "xxxxxxxxxxxxx"
+            }?:return
 
-            val sendTo = if (isSelf) event.recipientPubKey!!.toHex() else event.pubKey.toHex()
+            val sendTo = if (isSelf) event.recipientPubKey?.toHex()?:pubKey else event.pubKey.toHex()
 
             val chatRoom = ChatRoom(roomId = chatRoomID, sendTo, content, event.createdAt)
                 .also {
@@ -76,7 +76,8 @@ class HomeViewModel : WsViewModel() {
                 content,
                 event.createdAt,
                 if (isSelf) pubKey else sendTo,
-                false
+                isRead = false,
+                success = true,
             ).let {
                 scope.launch {
                     NostrDB.getDatabase(MyApplication.getInstance())
@@ -89,9 +90,9 @@ class HomeViewModel : WsViewModel() {
 
 
         } else {
-//            Log.e(
-//                "msg_room--->", "非我的消息？？??${event.toJson()}"
-//            )
+            Log.e(
+                "msg_room--->", "非我的消息？？??${event.toJson()}"
+            )
         }
     }
 
@@ -161,11 +162,12 @@ class HomeViewModel : WsViewModel() {
 
             if (setIds.contains(textEvent.id.toHex())) return@launch
             setIds.add(textEvent.id.toHex())
-            var feed = nostr.postr.db.FeedItem(
+            var feed = FeedItem(
                 textEvent.id.toString(),
                 textEvent.pubKey.toHex(),
                 textEvent.createdAt,
-                textEvent.content
+                textEvent.content,
+                textEvent.tag2JsonString()
             )
             NostrDB.getDatabase(MyApplication.getInstance())
                 .feedDao().insertFeed(feed)
@@ -199,7 +201,6 @@ class HomeViewModel : WsViewModel() {
                 this["p"] = listOf(pubKey)
             }
         val filter = mutableListOf(
-
             JsonFilter(
                 authors = mutableListOf(pubKey),
                 kinds = mutableListOf(0),
@@ -211,11 +212,17 @@ class HomeViewModel : WsViewModel() {
                 limit = 1
             ),
             JsonFilter(
+//from me
                 kinds = mutableListOf(4),//6
                 authors = mutableListOf(pubKey),
-//                since = NostrDB.getDatabase(MyApplication._instance)
-//                    .chatDao().getLast()?.createAt ?: (System.currentTimeMillis() / 10000),
-//                tags = map
+                since = NostrDB.getDatabase(MyApplication._instance)
+                    .chatDao().getLast()?.createAt ?: (System.currentTimeMillis() / 10000),
+            ),
+            JsonFilter(//to me
+                kinds = mutableListOf(4),//6
+                since = NostrDB.getDatabase(MyApplication._instance)
+                    .chatDao().getLast()?.createAt ?: (System.currentTimeMillis() / 10000),
+                tags = map
             ),
 //            JsonFilter(
 //                authors = listOf(AccountManger.getPublicKey()),
@@ -225,7 +232,7 @@ class HomeViewModel : WsViewModel() {
         wsClient.value.requestAndWatch(subscriptionId = mainSubscriptionId, filters = filter)
     }
 
-     fun subChat() {
+    fun subChat() {
         viewModelScope.launch(Dispatchers.IO) {
             val list = NostrDB.getDatabase(MyApplication._instance)
                 .chatDao().getTotalChatRoom().map {
@@ -235,7 +242,7 @@ class HomeViewModel : WsViewModel() {
                 subscriptionId = "req_chat_${getRand5()}", filters = mutableListOf(
                     JsonFilter(
                         kinds = mutableListOf(4),//6
-                        authors =list,
+                        authors = list,
                     )
                 )
             )
@@ -255,8 +262,8 @@ class HomeViewModel : WsViewModel() {
                     kinds = listOf(TextNoteEvent.kind),
 //                    tags = map,
                     authors = list,
-//                    since = NostrDB.getDatabase(MyApplication._instance)
-//                        .feedDao().getLast()?.created_at ?: (System.currentTimeMillis() / 10000),
+                    since = NostrDB.getDatabase(MyApplication._instance)
+                        .feedDao().getLast()?.created_at ?: (System.currentTimeMillis() / 10000),
                     limit = 200
                 )
             )

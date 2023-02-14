@@ -51,7 +51,6 @@ class UserDetailActivity : BaseAct() {
         pubkey = intent.getStringExtra("pubkey")!!
 
         userViewModel.pubKey = pubkey
-        binding.toolbar.title=pubkey
         userViewModel.reqProfile(pubkey)
         binding.toolbar.title = Hex.decode(pubkey).toNpub()
         userViewModel.user.observe(this) {

@@ -19,13 +19,18 @@
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_weight="1"
+        app:reverseLayout="true"
         android:id="@+id/recyclerView"
         android:layout_height="wrap_content"/>
 
+    <View
+        android:background="@color/md_theme_primaryContainer"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"/>
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:orientation="horizontal"
-        android:minHeight="56dp"
+        android:layout_marginBottom="8dp"
         android:gravity="center_vertical"
         android:layout_height="wrap_content">
 
@@ -34,12 +39,16 @@
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp"
+            app:boxStrokeWidth="1dp"
+            app:boxCornerRadiusTopStart="12dp"
+            app:boxCornerRadiusTopEnd="12dp"
+            app:boxCornerRadiusBottomStart="12dp"
+            app:boxCornerRadiusBottomEnd="12dp"
             android:layout_height="wrap_content">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
+                android:id="@+id/edContent"
                 android:layout_height="wrap_content"/>
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -48,7 +57,9 @@
         <com.google.android.material.button.MaterialButton
             android:layout_width="wrap_content"
             android:text="Send"
-            android:layout_height="wrap_content"/>
+            android:id="@+id/mbt_send"
+            android:layout_marginEnd="12dp"
+            android:layout_height="56dp"/>
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 

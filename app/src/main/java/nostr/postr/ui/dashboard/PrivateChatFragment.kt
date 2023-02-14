@@ -23,7 +23,7 @@ class PrivateChatFragment : Fragment(), ChatAdapter.ItemChildClickListener {
     lateinit var binding: FragmentDashboardBinding
 
     private val chatAdapter by lazy { ChatAdapter() }
-    private val viewModel by viewModels<DashboardViewModel>()
+    private val viewModel by viewModels<PrivateChatViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -44,7 +44,11 @@ class PrivateChatFragment : Fragment(), ChatAdapter.ItemChildClickListener {
             }
         }
         this.viewModel.chatRoomLiveDat.observe(viewLifecycleOwner) {
-            it.sortedByDescending { it.lastUpdate }
+            it.sortedByDescending { it.lastUpdate }.filter {
+                it.sendTo == AccountManger.getPublicKey() ||
+                        it.content.isNullOrEmpty()
+            }
+            binding.tvTitleChat.text="Chat(${it.size})"
             chatAdapter.differ.submitList(it)
         }
 
@@ -82,10 +86,8 @@ class PrivateChatFragment : Fragment(), ChatAdapter.ItemChildClickListener {
 
     override fun onClick(chatRoom: ChatRoom, itemView: View) {
         if (itemView.id == R.id.cl_root) {
-            startActivity(Intent(requireContext(), ChatActivity::class.java).apply {
-                putExtra("chat_room_id", chatRoom.roomId)
-            })
-        }else if (itemView.id == R.id.iv_avatar){
+            ChatActivity.startChat(requireActivity(), chatRoom.sendTo, chatRoom.roomId)
+        } else if (itemView.id == R.id.iv_avatar) {
             startActivity(Intent(requireContext(), UserDetailActivity::class.java)
                 .apply {
                     putExtra("pubkey", chatRoom.sendTo)

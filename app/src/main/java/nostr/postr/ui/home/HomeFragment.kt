@@ -98,7 +98,7 @@ class HomeFragment : Fragment(), FeedAdapter.ItemChildClickListener {
             R.id.tv_reply -> {
                 startActivity(Intent(requireContext(), UserDetailActivity::class.java)
                     .apply {
-                        putExtra("pubkey", feed.replyTos!![0])
+                        putExtra("pubkey", feed.feedItem.getReplyTos()!![0])
                     })
             }
             R.id.iv_content_img->{
