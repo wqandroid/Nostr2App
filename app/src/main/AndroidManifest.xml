@@ -20,7 +20,6 @@
             android:name=".ui.ImageDetailActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="false"
-            android:label="@string/title_activity_image_detail"
             android:theme="@style/AppTheme.Fullscreen" />
         <activity
             android:name=".ui.dashboard.ChatActivity"
@@ -32,7 +31,6 @@
         <activity
             android:name=".ui.user.UserDetailActivity"
             android:exported="false"
-            android:label="@string/title_activity_user_detail"
             android:theme="@style/AppTheme.TransparentStatusBar" />
         <activity
             android:name=".MainActivity"

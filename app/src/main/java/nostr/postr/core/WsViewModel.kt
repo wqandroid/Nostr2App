@@ -62,7 +62,7 @@ abstract class WsViewModel : ViewModel() {
     }
 
     val wsClient = lazy {
-        WSClient().also {
+        WSClient.also {
             it.subscribe(clientListener)
         }
     }

@@ -46,7 +46,7 @@ object Client {
         synchronized(this) {
 //            RelayPool.requestAndWatch(subscriptionId)
             relays.forEach {
-                it.requestAndWatch(subscriptionId = subscriptionId,null,filters)
+                it.requestAndWatch(subscriptionId = subscriptionId,filters)
             }
         }
     }

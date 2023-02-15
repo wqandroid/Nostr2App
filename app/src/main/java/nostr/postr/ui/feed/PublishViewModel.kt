@@ -20,9 +20,6 @@ class PublishViewModel : WsViewModel() {
     }
 
 
-    fun connection(){
-        wsClient.value.justConn()
-    }
 
 
     fun sendPost(text:String) {

@@ -121,19 +121,20 @@ class UserViewModel : WsViewModel() {
             val filters = mutableListOf(
                 JsonFilter(
                     authors = mutableListOf(pubKey),
-                    kinds = mutableListOf(0,3),
+                    kinds = mutableListOf(0),
                     limit = 1
                 ),
-//                JsonFilter(
-//                    kinds = mutableListOf(3),
-//                    tags = mutableMapOf<String, List<String>>()
-//                        .apply {
-//                            this["p"] = listOf(pubKey)
-//                        }
-//                ),
+                JsonFilter(
+                    kinds = mutableListOf(3),
+                    tags = mutableMapOf<String, List<String>>()
+                        .apply {
+                            this["p"] = listOf(pubKey)
+                        }
+                ),
                 JsonFilter(
                     authors = mutableListOf(pubKey),
                     kinds = mutableListOf(1),
+                    limit = 30
                 )
             )
             wsClient.value.requestAndWatch(subID, filters = filters)

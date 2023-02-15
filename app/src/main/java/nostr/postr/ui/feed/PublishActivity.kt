@@ -26,8 +26,6 @@ class PublishActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.mbtToolbar)
 
-
-        viewModel.connection()
         binding.mbtSend.setOnClickListener {
             viewModel.sendPost(binding.edText.text.toString())
         }

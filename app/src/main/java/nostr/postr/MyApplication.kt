@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.color.DynamicColors
 import com.tencent.mmkv.MMKV
+import nostr.postr.core.WSClient
 import nostr.postr.ui.AppViewModel
 
 class MyApplication : Application() {
@@ -17,7 +18,7 @@ class MyApplication : Application() {
 //        DynamicColors.applyToActivitiesIfAvailable(this)
 
         //链接所有ws
-        Client.connect()
+        WSClient.startConnection()
 
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
     }
