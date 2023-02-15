@@ -158,7 +158,7 @@ class HomeViewModel : WsViewModel() {
 //                            )
 //                        ) return@launch
 
-//            if (!textEvent.isFeed() || subscriptionId != followSubscriptionId) return@launch
+            if (subscriptionId != followSubscriptionId) return@launch
 
             if (setIds.contains(textEvent.id.toHex())) return@launch
             setIds.add(textEvent.id.toHex())
@@ -175,7 +175,7 @@ class HomeViewModel : WsViewModel() {
             if (count % 2 == 0) {
                 loadFeedFromDB()
             }
-            Log.e("TextNoteEvent--->$count", textEvent.toJson())
+//            Log.e("TextNoteEvent--->$count", textEvent.toJson())
 //            withContext(Dispatchers.Main) {
 //                feedCountLiveData.value = count
 //            }
@@ -189,6 +189,11 @@ class HomeViewModel : WsViewModel() {
                 }
             }
         }
+    }
+
+
+    fun reqGlobalFeed(){
+
     }
 
 

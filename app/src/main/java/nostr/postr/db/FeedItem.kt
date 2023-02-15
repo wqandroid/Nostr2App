@@ -29,5 +29,25 @@ class FeedItem(
         return parseTags().filter { it.firstOrNull() == "p" }.mapNotNull { it.getOrNull(1) }
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as FeedItem
+
+        if (id != other.id) return false
+        if (content != other.content) return false
+        if (tags != other.tags) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = id.hashCode()
+        result = 31 * result + content.hashCode()
+        result = 31 * result + (tags?.hashCode() ?: 0)
+        return result
+    }
+
 
 }

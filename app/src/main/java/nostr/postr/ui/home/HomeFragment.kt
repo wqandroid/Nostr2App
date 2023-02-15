@@ -18,6 +18,7 @@ import nostr.postr.ui.ImageDetailActivity
 import nostr.postr.ui.feed.Feed
 import nostr.postr.ui.feed.FeedAdapter
 import nostr.postr.ui.feed.PublishActivity
+import nostr.postr.ui.feed.global.GlobalFeedActivity
 import nostr.postr.ui.user.UserDetailActivity
 import nostr.postr.util.MD5
 import nostr.postr.util.UIUtils.makeGone
@@ -78,9 +79,11 @@ class HomeFragment : Fragment(), FeedAdapter.ItemChildClickListener {
         binding.ivAdd.setOnClickListener {
             startActivity(Intent(requireContext(), PublishActivity::class.java))
         }
+        binding.ivPublicFeed.setOnClickListener {
+            startActivity(Intent(requireContext(),GlobalFeedActivity::class.java))
+        }
         feedViewModel.reqMainUserInfo()
 //        feedViewModel.subChat()
-
     }
 
     override fun onClick(feed: Feed, itemView: View) {

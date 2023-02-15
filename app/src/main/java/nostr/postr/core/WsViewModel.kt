@@ -12,7 +12,7 @@ import nostr.postr.events.*
 import java.util.*
 
 abstract class WsViewModel : ViewModel() {
-     val scope = CoroutineScope(Job() + Dispatchers.IO)
+    val scope = CoroutineScope(Job() + Dispatchers.IO)
 
     var comDis = CompositeDisposable()
 
@@ -101,6 +101,7 @@ abstract class WsViewModel : ViewModel() {
 //        wsClient.value.disconnect()
         comDis.clear()
         Log.e(
-            "RELAY","手动------------》disconnect")
+            "RELAY", "手动------------》disconnect"
+        )
     }
 }

@@ -48,6 +48,22 @@ data class Feed(val feedItem: FeedItem, val userProfile: UserProfile?) {
         return userProfile?.picture ?: "https://robohash.org/${feedItem.pubkey}.png"
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Feed
+
+        if (feedItem != other.feedItem) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return feedItem.hashCode()
+    }
+
+
 }
 
 class FeedAdapter() :
@@ -142,7 +158,7 @@ class FeedAdapter() :
 
     private val diffCallBack = object : DiffUtil.ItemCallback<Feed>() {
         override fun areItemsTheSame(oldItem: Feed, newItem: Feed): Boolean {
-            return oldItem.feedItem.id == newItem.feedItem.id
+            return oldItem == newItem
         }
 
         override fun areContentsTheSame(oldItem: Feed, newItem: Feed): Boolean {
@@ -151,7 +167,6 @@ class FeedAdapter() :
                     || oldItem.feedItem.getMentions() == newItem.feedItem.getMentions()
 
         }
-
     }
 
     val differ = AsyncListDiffer(this, diffCallBack)

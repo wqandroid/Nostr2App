@@ -99,6 +99,11 @@ class UserDetailActivity : BaseAct() {
         }
 
         AccountManger.follows.let {
+            if (AccountManger.follows.contains(pubkey)){
+                binding.mbtFollow.icon=getDrawable(R.drawable.baseline_person_remove_24)
+            }else{
+                binding.mbtFollow.icon=getDrawable(R.drawable.baseline_person_add_24)
+            }
             binding.mbtFollow.setOnClickListener { v ->
                 userViewModel.addFlow(
                     pubkey,
