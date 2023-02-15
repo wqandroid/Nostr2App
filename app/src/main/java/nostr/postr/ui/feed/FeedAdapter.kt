@@ -25,7 +25,6 @@ import nostr.postr.util.buildSpannableString
 import java.util.regex.Pattern
 
 
-
 val imageExtension: Pattern = Pattern.compile("(.*/)*.+\\.(png|jpg|gif|bmp|jpeg|webp|svg)$")
 val videoExtension: Pattern = Pattern.compile("(.*/)*.+\\.(mp4|avi|wmv|mpg|amv|webm)$")
 
@@ -66,7 +65,7 @@ data class Feed(val feedItem: FeedItem, val userProfile: UserProfile?) {
 
 }
 
-class FeedAdapter() :
+class FeedAdapter(val isUseDiff: Boolean = true, val data: List<Feed> = mutableListOf()) :
     RecyclerView.Adapter<FeedAdapter.FeedViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FeedViewHolder {
 
@@ -80,10 +79,10 @@ class FeedAdapter() :
     var clickListener: ItemChildClickListener? = null
 
 
-
-
     override fun onBindViewHolder(holder: FeedViewHolder, position: Int) {
-        val item: Feed = differ.currentList[position]
+
+        val item: Feed = if (isUseDiff) differ.currentList[position] else data[position]
+
         holder.binding.tvContent.text = item.feedItem.content
         holder.binding.tvTime.text = UIUtils.parseTime(item.feedItem.created_at)
 
@@ -93,16 +92,19 @@ class FeedAdapter() :
 
             holder.binding.tvReply.makeVisibility()
             holder.binding.tvReply.buildSpannableString {
-                addText("reply"){
+                addText("reply") {
                     setColor(MyApplication._instance.getColor(R.color.md_theme_primary))
                 }
-                item.feedItem.getReplyTos().forEach { key->
-                    addText("@${key.substring(0,6)}"){
+                item.feedItem.getReplyTos().forEach { key ->
+                    addText("@${key.substring(0, 6)}") {
                         setColor(MyApplication._instance.getColor(R.color.md_theme_primary))
                         onClick {
                             holder.itemView.context.startActivity(
-                                Intent(holder.itemView.context,UserDetailActivity::class.java).apply {
-                                    putExtra("pubkey",key)
+                                Intent(
+                                    holder.itemView.context,
+                                    UserDetailActivity::class.java
+                                ).apply {
+                                    putExtra("pubkey", key)
                                 }
                             )
                         }
@@ -150,7 +152,7 @@ class FeedAdapter() :
     }
 
 
-    override fun getItemCount() = differ.currentList.size
+    override fun getItemCount() = if (isUseDiff) differ.currentList.size else data.size
 
     inner class FeedViewHolder(val binding: FragmentFeedItemBinding) :
         RecyclerView.ViewHolder(binding.root)

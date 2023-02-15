@@ -25,6 +25,9 @@ class UserProfile(
     fun bestName(): String {
         return display_name ?: name ?: pubkey
     }
+    fun getUserAvatar(): String {
+        return picture ?: "https://robohash.org/${pubkey}.png"
+    }
 }
 
 @Entity(tableName = "block_user2")

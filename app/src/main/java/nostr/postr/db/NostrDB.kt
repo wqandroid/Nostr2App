@@ -108,8 +108,12 @@ interface ChatDao {
 
     @Query("SELECT * FROM chat ORDER BY createAt DESC LIMIT 1")
     fun getLast(): ChatMessage?
-    @Query("select * from chat_room")
+    @Query("select * from chat_room ")
     fun getAllChatRoom(): Flowable<List<ChatRoom>>
+
+    @Query("select * from chat_room where roomId=:s")
+    suspend fun getChatRoomById(s:String): ChatRoom?
+
 
     @Query("select * from chat_room")
     suspend fun getTotalChatRoom(): List<ChatRoom>

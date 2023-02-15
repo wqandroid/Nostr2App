@@ -21,7 +21,8 @@ class GlobalFeedViewModel : WsViewModel() {
     private val mainSubscriptionId = "global_feed${UUID.randomUUID().toString().substring(0..5)}"
 
 
-    val feedLiveData = MutableLiveData<MutableList<Feed>>()
+    val feedLiveData = MutableLiveData<Feed>()
+
 
     //this is filter words
     private val tempList = mutableListOf<String>()
@@ -82,16 +83,10 @@ class GlobalFeedViewModel : WsViewModel() {
     }
 
 
-    private suspend fun postFeedList(item: FeedItem) {
-
-        val origin = feedLiveData.value ?: mutableListOf()
-
-        origin.add(
-            0, Feed(feedItem = item, userMap[item.pubkey])
-        )
-
-        feedLiveData.postValue(origin)
+    private fun postFeedList(item: FeedItem) {
+        feedLiveData.postValue(Feed(feedItem = item, userMap[item.pubkey]))
     }
+
 
 
     fun reqGlobalFeed() {
@@ -109,19 +104,15 @@ class GlobalFeedViewModel : WsViewModel() {
 
 
     private suspend fun reqProfile(list: List<String>) {
-        scope.launch {
-            val filter = JsonFilter(
-                kinds = mutableListOf(0),
-//                since = 1675748168,
-//                limit = 20,
-                authors = list
-            )
-            val profileSubscriptionId = "profile_${UUID.randomUUID().toString().substring(0..5)}"
-            wsClient.value.requestAndWatch(
-                subscriptionId = profileSubscriptionId,
-                filters = mutableListOf(filter)
-            )
-        }
+        val filter = JsonFilter(
+            kinds = mutableListOf(0),
+            authors = list
+        )
+        val profileSubscriptionId = "profile_${UUID.randomUUID().toString().substring(0..5)}"
+        wsClient.value.requestAndWatch(
+            subscriptionId = profileSubscriptionId,
+            filters = mutableListOf(filter)
+        )
     }
 
 

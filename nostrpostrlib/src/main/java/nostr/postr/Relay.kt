@@ -24,8 +24,9 @@ class Relay(
         .followRedirects(true)
         .followSslRedirects(true)
         .build()
+    var retryTime = 700L
 
-    private var isOpen = false
+    var isOpen = false
 
 
     private val sendFailedMsgSet = linkedSetOf<String>()
@@ -61,6 +62,7 @@ class Relay(
 
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 isOpen = true
+                retryTime=700L
                 sendFailedMsgSet.forEach {
                     webSocket.send(it)
                     Thread.sleep(100)
@@ -86,6 +88,10 @@ class Relay(
                 listeners.forEach {
                     it.onError(Error("WebSocket Failure", t), "justConnection", this@Relay)
                 }
+                Thread.sleep(retryTime)
+                //遇到错误在重新链接
+                justConnection()
+                retryTime+=700
             }
         }
         socket = httpClient.newWebSocket(request, listener)

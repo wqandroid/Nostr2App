@@ -85,25 +85,22 @@ class UserViewModel : WsViewModel() {
     }
 
     val followList = MutableLiveData<List<FollowInfo>>()
+    private val tempFollowList = mutableListOf<FollowInfo>()
     override fun onRecContactListEvent(subscriptionId: String, event: ContactListEvent) {
         super.onRecContactListEvent(subscriptionId, event)
 
         if (subscriptionId == subID) {
-
             viewModelScope.launch {
-
                 withContext(Dispatchers.IO) {
-
-                    var list = event.follows
+                    tempFollowList.addAll(event.follows
                         .map {
                             FollowInfo(
                                 it.pubKeyHex,
                                 it.relayUri,
-                                NostrDB.getDatabase(MyApplication._instance).profileDao()
-                                    .getUserInfo2(it.pubKeyHex)
+                                null,
                             )
-                        }
-                    followList.postValue(list)
+                        })
+                    followList.postValue(tempFollowList)
                 }
             }
         }
@@ -121,7 +118,7 @@ class UserViewModel : WsViewModel() {
             val filters = mutableListOf(
                 JsonFilter(
                     authors = mutableListOf(pubKey),
-                    kinds = mutableListOf(0,3),
+                    kinds = mutableListOf(0, 3),
                     limit = 1
                 ),
 //                JsonFilter(

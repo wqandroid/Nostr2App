@@ -61,6 +61,8 @@ abstract class WsViewModel : ViewModel() {
         }
     }
 
+
+
     val wsClient = lazy {
         WSClient.also {
             it.subscribe(clientListener)

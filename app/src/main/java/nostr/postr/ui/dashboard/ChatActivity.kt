@@ -51,6 +51,7 @@ class ChatActivity : AppCompatActivity() {
                     list.clear()
                     list.addAll(it.sortedBy { it.createAt })
                     msgAdapter.notifyDataSetChanged()
+                    binding.recyclerView.scrollToPosition(0)
                 }
         }
 

@@ -21,8 +21,10 @@ class GlobalFeedActivity : AppCompatActivity(), FeedAdapter.ItemChildClickListen
     private val viewModel by viewModels<GlobalFeedViewModel>()
     private lateinit var binding: ActivityGlobalFeedBinding
 
+    private val list= mutableListOf<Feed>()
+
     private val adapter by lazy {
-        FeedAdapter().also {
+        FeedAdapter(false,list).also {
             it.clickListener = this@GlobalFeedActivity
         }
     }
@@ -39,12 +41,15 @@ class GlobalFeedActivity : AppCompatActivity(), FeedAdapter.ItemChildClickListen
         }
 
         viewModel.feedLiveData.observe(this) {
-            Log.e("feed_","global:${it.size}")
-            adapter.differ.submitList(it)
+//            Log.e("feed_","global:${it.size}")
+            list.add(0,it)
+            if (list.size<5){
+                adapter.notifyDataSetChanged()
+            }else if (list.size%5==0){
+                adapter.notifyDataSetChanged()
+            }
         }
-
         viewModel.reqGlobalFeed()
-
     }
 
     override fun onClick(feed: Feed, itemView: View) {

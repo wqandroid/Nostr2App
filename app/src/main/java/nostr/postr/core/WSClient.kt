@@ -4,10 +4,10 @@ import nostr.postr.*
 import nostr.postr.events.Event
 import java.util.*
 
-object  WSClient {
+object WSClient {
 
 
-    private val relays: List<Relay> = Constants.getUserRelays().filter { it.enable }
+    private val relays: List<Relay> = Constants.getUserRelays()
 
 
     fun startConnection() {
@@ -22,7 +22,7 @@ object  WSClient {
         filters: MutableList<JsonFilter> = mutableListOf(JsonFilter())
     ) {
         this.relays.forEach {
-            it.requestAndWatch(subscriptionId = subscriptionId,  filters)
+            it.requestAndWatch(subscriptionId = subscriptionId, filters)
         }
     }
 
@@ -45,9 +45,13 @@ object  WSClient {
         }
     }
 
-    fun subscribe(listener: Client.Listener) {
-        this.relays.forEach {
-            it.register(listener)
+    fun subscribe(listener: Client.Listener, allRelay: Boolean = true) {
+        if (allRelay) {
+            this.relays.forEach {
+                it.register(listener)
+            }
+        } else {
+            this.relays.firstOrNull { it.isOpen }?.register(listener)
         }
     }
 
