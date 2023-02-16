@@ -7,7 +7,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import nostr.postr.Client
+import nostr.postr.MyApplication
 import nostr.postr.Relay
+import nostr.postr.db.NostrDB
 import nostr.postr.events.*
 import java.util.*
 
@@ -62,7 +64,6 @@ abstract class WsViewModel : ViewModel() {
     }
 
 
-
     val wsClient = lazy {
         WSClient.also {
             it.subscribe(clientListener)
@@ -91,6 +92,10 @@ abstract class WsViewModel : ViewModel() {
 
     open fun onOk(relay: Relay) {
 
+    }
+
+    fun getDB(): NostrDB {
+        return NostrDB.getDatabase(MyApplication._instance)
     }
 
     fun getRand5(): String {

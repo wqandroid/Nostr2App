@@ -11,11 +11,14 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <activity
+            android:name=".ui.user.followlist.UserFollowsListAct"
+            android:exported="false" />
         <activity
             android:name=".ui.feed.global.GlobalFeedActivity"
             android:exported="false" />
@@ -25,7 +28,12 @@
             android:exported="false"
             android:theme="@style/AppTheme.Fullscreen" />
         <activity
-            android:name=".ui.dashboard.ChatActivity"
+            android:name=".ui.account.LoginActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:exported="false"
+            android:theme="@style/AppTheme.TransparentStatusBar"></activity>
+        <activity
+            android:name=".ui.chat.ChatActivity"
             android:exported="false"
             android:theme="@style/AppTheme" />
         <activity

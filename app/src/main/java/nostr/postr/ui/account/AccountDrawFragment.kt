@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import nostr.postr.MyApplication
@@ -39,10 +40,29 @@ class AccountDrawFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.mbtLogin.setOnClickListener {
             if (AccountManger.isLogin()) {
-                AccountManger.logout()
-                updateLoginStatus()
+                dis.add(NostrDB.getDatabase(MyApplication._instance)
+                    .chatDao().getAllChatRoom()
+                    .map {
+                        NostrDB.getDatabase(MyApplication._instance)
+                            .chatDao().deleteAll(it)
+
+                        NostrDB.getDatabase(MyApplication._instance)
+                            .chatDao().getAllChatMsg().run {
+                                NostrDB.getDatabase(MyApplication._instance).chatDao()
+                                    .deleteAllMsg(this)
+                            }
+
+                        AccountManger.logout()
+                        true
+                    }.observeOn(AndroidSchedulers.mainThread())
+                    .subscribe {
+                        updateLoginStatus()
+                        startActivity(Intent(requireContext(), LoginActivity::class.java))
+                        requireActivity().finish()
+                    })
             } else {
-                LoginBottomDialog().show(childFragmentManager, "")
+                startActivity(Intent(requireContext(), LoginActivity::class.java))
+                requireActivity().finish()
             }
         }
 
@@ -65,11 +85,8 @@ class AccountDrawFragment : Fragment() {
                         .apply {
                             putExtra("pubkey", AccountManger.getPublicKey())
                         })
-            } else {
-                LoginBottomDialog().show(childFragmentManager, "")
             }
         }
-
 
     }
 
@@ -89,15 +106,15 @@ class AccountDrawFragment : Fragment() {
             binding.tvName.text = ""
             binding.tvDesc.text = ""
             dis.add(
-                    NostrDB.getDatabase(MyApplication._instance).profileDao()
-                        .getUserInfoRx(AccountManger.getPublicKey())
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe {
-                            showProfile(it)
-                        }
+                NostrDB.getDatabase(MyApplication._instance).profileDao()
+                    .getUserInfoRx(AccountManger.getPublicKey())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe {
+                        showProfile(it)
+                    }
 
-                )
+            )
         } else {
             binding.mbtLogin.text = "Login"
             binding.tvName.text = "未登录"

@@ -1,4 +1,4 @@
-package nostr.postr.ui.dashboard
+package nostr.postr.ui.chat.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
@@ -19,6 +19,7 @@ import nostr.postr.db.UserProfile
 import nostr.postr.events.ContactListEvent
 import nostr.postr.events.MetadataEvent
 import nostr.postr.events.PrivateDmEvent
+import nostr.postr.ui.user.followlist.FollowInfo
 import java.util.*
 
 class PrivateChatViewModel : WsViewModel() {
@@ -111,12 +112,12 @@ class PrivateChatViewModel : WsViewModel() {
 
         comDis.add(
             NostrDB.getDatabase(MyApplication._instance)
-                .chatDao().getAllChatRoom().map {
-                    it.forEach {
-                        it.profile = NostrDB.getDatabase(MyApplication._instance)
-                            .profileDao().getUserInfo2(it.sendTo)
+                .chatDao().getAllChatRoom().map { chatRooms ->
+                    chatRooms.forEach { room ->
+                        room.profile = NostrDB.getDatabase(MyApplication._instance)
+                            .profileDao().getUserInfo2(room.sendTo)
                     }
-                    it
+                    chatRooms
                 }.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
@@ -143,7 +144,6 @@ class PrivateChatViewModel : WsViewModel() {
                     content,
                     event.createdAt,
                     AccountManger.getPublicKey(),
-                    isRead = true,
                     success = false,
                 ).also {
                     NostrDB.getDatabase(MyApplication._instance)
@@ -153,6 +153,17 @@ class PrivateChatViewModel : WsViewModel() {
         }
     }
 
+
+    fun makeAllMessageAsRead(chatRoomID: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            getDB().chatDao().getChatRoomById(chatRoomID)?.let {
+                if (it.hasUnread){
+                    it.hasUnread = false
+                    getDB().chatDao().createChatRoom(it)
+                }
+            }
+        }
+    }
 
     private fun reqProfile(list: List<String>) {
         viewModelScope.launch {

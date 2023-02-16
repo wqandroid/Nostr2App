@@ -11,7 +11,6 @@ class ChatMessage(
     val content: String,
     val createAt: Long,
     val createPubKey: String,
-    val isRead: Boolean,
     val success: Boolean = true
 )
 
@@ -19,9 +18,11 @@ class ChatMessage(
 class ChatRoom(
     @PrimaryKey val roomId: String,
     val sendTo: String,
-    val content: String,
-    val lastUpdate: Long
+    var content: String,
+    var lastUpdate: Long,
+    var hasUnread: Boolean,
 ) {
+
     @Ignore
     var profile: UserProfile? = null
     override fun equals(other: Any?): Boolean {

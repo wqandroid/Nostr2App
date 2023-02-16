@@ -1,5 +1,6 @@
 package nostr.postr
 
+import android.content.Intent
 import android.os.Bundle
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
@@ -7,8 +8,10 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import nostr.postr.core.AccountManger
 import nostr.postr.core.BaseAct
 import nostr.postr.databinding.ActivityMainBinding
+import nostr.postr.ui.account.LoginActivity
 
 class MainActivity : BaseAct() {
 
@@ -23,6 +26,12 @@ class MainActivity : BaseAct() {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
 
+        if (!AccountManger.isLogin()){
+            startActivity(Intent(this,LoginActivity::class.java))
+            finish()
+            return
+        }
+
 
         val navView: BottomNavigationView = binding.navView
 
@@ -36,6 +45,7 @@ class MainActivity : BaseAct() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
 
 
 //        MyApplication.getViewModel().reqMainUserInfo()

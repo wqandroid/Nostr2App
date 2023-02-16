@@ -1,141 +1,139 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:minHeight="320dp"
-    android:theme="@style/AppTheme.NoActionBar"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    >
+
 
 
     <TextView
         android:id="@+id/tv_title"
-        android:paddingTop="32dp"
-        app:layout_constraintTop_toTopOf="parent"
+        style="@style/TextAppearance.AppCompat.Display1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="76dp"
+        android:text="@string/app_name"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        style="@style/TextAppearance.AppCompat.Display1"
-        android:text="Nostr Client"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
 
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tv_input"
         android:layout_width="match_parent"
-        android:layout_margin="16dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
+        android:layout_marginEnd="22dp"
+        android:layout_marginTop="92dp"
+        app:endIconDrawable="@drawable/baseline_content_paste_24"
+        app:endIconMode="custom"
+
+        app:endIconTint="@color/md_theme_onSurface"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_title"
-        android:layout_height="wrap_content"
-        app:endIconMode="custom"
-        android:id="@+id/tv_input"
-        app:endIconTint="@color/md_theme_onSurface"
-        app:endIconDrawable="@drawable/baseline_content_paste_24"
-        >
+        app:layout_constraintTop_toBottomOf="@id/tv_title">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:layout_width="match_parent"
             android:id="@+id/ed_key"
-            android:maxLines="1"
-            android:inputType="textPassword"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/private_key" />
+            android:hint="@string/private_key"
+            android:inputType="textPassword"
+            android:maxLines="1" />
     </com.google.android.material.textfield.TextInputLayout>
 
 
-
     <com.google.android.material.card.MaterialCardView
-        android:layout_width="match_parent"
         android:id="@+id/md_tips"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="22dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="22dp"
         android:visibility="gone"
-        android:layout_marginStart="16dp"
-        app:strokeColor="@color/md_theme_tertiaryContainer"
         app:cardBackgroundColor="@color/md_theme_tertiaryContainer"
         app:layout_constraintTop_toBottomOf="@id/tv_input"
-        android:layout_height="wrap_content">
+        app:strokeColor="@color/md_theme_tertiaryContainer">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <TextView
+                android:id="@+id/tv_title_warning"
+                style="@style/TextAppearance.Material3.TitleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
                 android:layout_marginTop="14dp"
                 android:layout_marginEnd="14dp"
-                android:layout_marginStart="14dp"
-                android:id="@+id/tv_title_warning"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                style="@style/TextAppearance.Material3.TitleSmall"
                 android:text="Important"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_title_warning"
-                android:layout_marginStart="14dp"
-                android:layout_marginEnd="14dp"
-                android:layout_marginTop="10dp"
-                android:textColor="@color/md_theme_onTertiaryContainer"
-                android:text="@string/access_warning"
                 android:id="@+id/tv_warning"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="14dp"
+                android:text="@string/access_warning"
+                android:textColor="@color/md_theme_onTertiaryContainer"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_title_warning" />
 
 
             <com.google.android.material.button.MaterialButton
-                android:layout_width="wrap_content"
-                android:text="@string/copy_key"
                 android:id="@+id/mbt_copy_key"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_warning"
-                app:layout_constraintBottom_toBottomOf="parent"
                 style="@style/Widget.Material3.Button.TextButton"
-                android:layout_height="wrap_content"/>
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/copy_key"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_warning" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
 
 
     </com.google.android.material.card.MaterialCardView>
 
 
-
     <com.google.android.material.button.MaterialButton
-        android:layout_width="match_parent"
-        android:text="@string/access"
         android:id="@+id/mbt_access"
-        app:layout_constraintBottom_toTopOf="@id/mbt_create_key"
-        android:layout_margin="16dp"
-        app:layout_constraintTop_toBottomOf="@id/md_tips"
-        android:layout_height="wrap_content"/>
-
-
-
-    <TextView
-        android:layout_marginTop="14dp"
-        android:layout_marginEnd="14dp"
-        android:paddingBottom="12dp"
-        android:layout_marginStart="14dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="22dp"
+        android:text="@string/access"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        style="@style/TextAppearance.Material3.TitleSmall"
-        android:text="@string/not_key"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        app:layout_constraintTop_toBottomOf="@id/md_tips" />
 
 
     <com.google.android.material.button.MaterialButton
-        android:layout_width="wrap_content"
-        android:text="@string/create_key"
-        android:id="@+id/mbt_create_key"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
         style="@style/Widget.Material3.Button.TextButton"
-        android:layout_height="wrap_content"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:text="@string/not_key"
+        android:textColor="@color/md_theme_onSurface"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/mbt_create_key"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:text="@string/create_key"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

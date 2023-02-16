@@ -1,8 +1,9 @@
-package nostr.postr.ui.dashboard
+package nostr.postr.ui.chat
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -11,8 +12,8 @@ import nostr.postr.databinding.ItemChatGroupBinding
 import nostr.postr.db.ChatRoom
 
 
-class ChatAdapter :
-    RecyclerView.Adapter<ChatAdapter.ViewHolder>() {
+class ChatListAdapter :
+    RecyclerView.Adapter<ChatListAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
@@ -37,6 +38,8 @@ class ChatAdapter :
             holder.binding.ivAvatar
         )
 
+        holder.binding.ivHasUnRead.isVisible=item.hasUnread
+
         holder.binding.clRoot.setOnClickListener {
             clickListener?.onClick(item,it)
         }
@@ -54,7 +57,7 @@ class ChatAdapter :
 
     private val diffCallback = object : DiffUtil.ItemCallback<ChatRoom>() {
         override fun areItemsTheSame(oldItem: ChatRoom, newItem: ChatRoom): Boolean {
-            return oldItem.roomId == newItem.roomId
+            return oldItem == newItem
         }
 
         override fun areContentsTheSame(oldItem: ChatRoom, newItem: ChatRoom): Boolean {

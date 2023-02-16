@@ -58,34 +58,41 @@ class HomeViewModel : WsViewModel() {
                     AccountManger.getPrivateKey(),
                     event.pubKey
                 )
-            }?:return
+            } ?: return
 
-            val sendTo = if (isSelf) event.recipientPubKey?.toHex()?:pubKey else event.pubKey.toHex()
+            val sendTo =
+                if (isSelf) event.recipientPubKey?.toHex() ?: pubKey else event.pubKey.toHex()
 
-            val chatRoom = ChatRoom(roomId = chatRoomID, sendTo, content, event.createdAt)
-                .also {
-                    scope.launch {
-                        NostrDB.getDatabase(MyApplication._instance)
-                            .chatDao().createChatRoom(it)
-                    }
+            scope.launch {
+                var room = getDB().chatDao().getChatRoomById(chatRoomID)
+                if (room == null) {
+                    room = ChatRoom(
+                        roomId = chatRoomID,
+                        sendTo,
+                        content,
+                        event.createdAt,
+                        true
+                    )
+                } else {
+                    room.hasUnread = true
+                    room.content = content
+                    room.lastUpdate = event.createdAt
                 }
-
-            ChatMessage(
-                event.id.toHex(),
-                chatRoomID,
-                content,
-                event.createdAt,
-                if (isSelf) pubKey else sendTo,
-                isRead = false,
-                success = true,
-            ).let {
-                scope.launch {
-                    NostrDB.getDatabase(MyApplication.getInstance())
+                getDB().chatDao().createChatRoom(room)
+                ChatMessage(
+                    event.id.toHex(),
+                    chatRoomID,
+                    content,
+                    event.createdAt,
+                    if (isSelf) pubKey else sendTo,
+                    success = true,
+                ).also {
+                    getDB()
                         .chatDao().insertMsg(it)
+                    Log.e(
+                        "msg_room--->", "${chatRoomID}\n:-->私信群组:$isSelf   ${it.content}"
+                    )
                 }
-                Log.e(
-                    "msg_room--->", "${chatRoom.roomId}\n:-->私信群组:$isSelf   ${it.content}"
-                )
             }
 
 
@@ -192,7 +199,7 @@ class HomeViewModel : WsViewModel() {
     }
 
 
-    fun reqGlobalFeed(){
+    fun reqGlobalFeed() {
 
     }
 
@@ -268,7 +275,8 @@ class HomeViewModel : WsViewModel() {
 //                    tags = map,
                     authors = list,
                     since = NostrDB.getDatabase(MyApplication._instance)
-                        .feedDao().getLast()?.created_at ?: (System.currentTimeMillis() / 10000),
+                        .feedDao().getLast()?.created_at
+                        ?: (System.currentTimeMillis() / 10000),
                     limit = 200
                 )
             )
@@ -284,7 +292,8 @@ class HomeViewModel : WsViewModel() {
 //                limit = 20,
                 authors = list
             )
-            val profileSubscriptionId = "profile_${UUID.randomUUID().toString().substring(0..5)}"
+            val profileSubscriptionId =
+                "profile_${UUID.randomUUID().toString().substring(0..5)}"
             wsClient.value.requestAndWatch(
                 subscriptionId = profileSubscriptionId,
                 filters = mutableListOf(filter)

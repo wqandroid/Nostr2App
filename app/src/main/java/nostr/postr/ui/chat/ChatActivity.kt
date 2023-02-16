@@ -1,21 +1,20 @@
-package nostr.postr.ui.dashboard
+package nostr.postr.ui.chat
 
 import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.LayoutInflater
 import androidx.activity.viewModels
 import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import nostr.postr.MyApplication
-import nostr.postr.R
+import nostr.postr.core.AccountManger
 import nostr.postr.databinding.ActivityChatBinding
 import nostr.postr.db.ChatMessage
-import nostr.postr.db.ChatRoom
 import nostr.postr.db.NostrDB
+import nostr.postr.ui.chat.viewmodel.PrivateChatViewModel
 
 class ChatActivity : AppCompatActivity() {
 
@@ -25,10 +24,10 @@ class ChatActivity : AppCompatActivity() {
     private val list = mutableListOf<ChatMessage>()
     private lateinit var msgAdapter: ChatMsgAdapter
 
-    private val viewMdodel by viewModels<PrivateChatViewModel>()
+    private val viewModel by viewModels<PrivateChatViewModel>()
     private lateinit var pubKey: String
     private lateinit var chatRoom: String
-
+    private lateinit var layoutManager: LinearLayoutManager
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityChatBinding.inflate(layoutInflater)
@@ -37,11 +36,15 @@ class ChatActivity : AppCompatActivity() {
         msgAdapter = ChatMsgAdapter(list)
         binding.recyclerView
             .apply {
-                layoutManager = LinearLayoutManager(this@ChatActivity)
+                layoutManager = LinearLayoutManager(this@ChatActivity).also {
+                    it.stackFromEnd = true
+                    this@ChatActivity.layoutManager=it
+                }
                 adapter = msgAdapter
             }
         pubKey = intent?.getStringExtra("pubKey") ?: return
-        chatRoom=intent.getStringExtra("chat_room_id")?:return
+        chatRoom = intent.getStringExtra("chat_room_id") ?: return
+        viewModel.makeAllMessageAsRead(chatRoom)
         chatRoom.let {
             NostrDB.getDatabase(MyApplication._instance)
                 .chatDao().getChatGroupMessage(it)
@@ -51,7 +54,11 @@ class ChatActivity : AppCompatActivity() {
                     list.clear()
                     list.addAll(it.sortedBy { it.createAt })
                     msgAdapter.notifyDataSetChanged()
-                    binding.recyclerView.scrollToPosition(0)
+                    layoutManager.scrollToPositionWithOffset(
+                        msgAdapter.itemCount-1,
+                        Integer.MIN_VALUE
+                    )
+                    viewModel.makeAllMessageAsRead(chatRoom)
                 }
         }
 
@@ -60,7 +67,7 @@ class ChatActivity : AppCompatActivity() {
         }
 
         binding.mbtSend.setOnClickListener {
-            viewMdodel.sendChat(binding.edContent.text.toString(),pubKey,chatRoom)
+            viewModel.sendChat(binding.edContent.text.toString(), pubKey, chatRoom)
             binding.edContent.setText("")
         }
     }

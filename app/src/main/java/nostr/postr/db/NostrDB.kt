@@ -7,7 +7,7 @@ import io.reactivex.rxjava3.core.Flowable
 
 @Database(
     entities = [FeedItem::class, UserProfile::class, BlockUser::class,
-        ChatMessage::class,ChatRoom::class,
+        ChatMessage::class, ChatRoom::class,
         FollowUserKey::class],
     version = 1
 )
@@ -28,7 +28,7 @@ abstract class NostrDB : RoomDatabase() {
         fun getDatabase(context: Context): NostrDB {
             if (appDatabase == null) {
                 synchronized(this) {
-                    appDatabase = Room.databaseBuilder(context, NostrDB::class.java, "nor18.db")
+                    appDatabase = Room.databaseBuilder(context, NostrDB::class.java, "nor19.db")
                         .fallbackToDestructiveMigration()
                         .allowMainThreadQueries()
                         .build()
@@ -106,23 +106,39 @@ interface ChatDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun createChatRoom(chat: ChatRoom)
 
+    @Query("select * from chat_room where roomId=:s")
+    suspend fun getChatRoomById(s: String): ChatRoom?
+
     @Query("SELECT * FROM chat ORDER BY createAt DESC LIMIT 1")
     fun getLast(): ChatMessage?
+
     @Query("select * from chat_room ")
     fun getAllChatRoom(): Flowable<List<ChatRoom>>
-
-    @Query("select * from chat_room where roomId=:s")
-    suspend fun getChatRoomById(s:String): ChatRoom?
 
 
     @Query("select * from chat_room")
     suspend fun getTotalChatRoom(): List<ChatRoom>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMsg(chat: ChatMessage)
 
     @Query("select * from chat where roomId=:s")
-     fun getChatGroupMessage(s: String): Flowable<List<ChatMessage>>
+    fun getChatGroupMessage(s: String): Flowable<List<ChatMessage>>
 
+    @Query("select * from chat where roomId=:s")
+    fun getChatGroupMessage2(s: String): List<ChatMessage>
+
+    @Query("select * from chat where msgId=:s")
+    fun getChatMsgById(s: String): ChatMessage?
+
+    @Query("select * from chat ")
+    fun getAllChatMsg(): List<ChatMessage>
+
+    @Delete
+    fun deleteAll(room: List<ChatRoom>)
+
+    @Delete
+    fun deleteAllMsg(room: List<ChatMessage>)
 }
 
 

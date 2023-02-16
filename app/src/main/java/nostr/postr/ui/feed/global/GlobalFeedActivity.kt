@@ -21,10 +21,10 @@ class GlobalFeedActivity : AppCompatActivity(), FeedAdapter.ItemChildClickListen
     private val viewModel by viewModels<GlobalFeedViewModel>()
     private lateinit var binding: ActivityGlobalFeedBinding
 
-    private val list= mutableListOf<Feed>()
+    private val list = mutableListOf<Feed>()
 
     private val adapter by lazy {
-        FeedAdapter(false,list).also {
+        FeedAdapter(false, list).also {
             it.clickListener = this@GlobalFeedActivity
         }
     }
@@ -42,10 +42,12 @@ class GlobalFeedActivity : AppCompatActivity(), FeedAdapter.ItemChildClickListen
 
         viewModel.feedLiveData.observe(this) {
 //            Log.e("feed_","global:${it.size}")
-            list.add(0,it)
-            if (list.size<5){
+            list.add(0, it)
+
+            if (list.size < 5) {
                 adapter.notifyDataSetChanged()
-            }else if (list.size%5==0){
+            } else if (list.size % 10 == 0) {
+                list.sortedByDescending { it.feedItem.created_at }
                 adapter.notifyDataSetChanged()
             }
         }
@@ -61,20 +63,20 @@ class GlobalFeedActivity : AppCompatActivity(), FeedAdapter.ItemChildClickListen
             R.id.iv_avatar -> {
                 startActivity(
                     Intent(this, UserDetailActivity::class.java)
-                    .apply {
-                        putExtra("pubkey", feed.feedItem.pubkey)
-                    })
+                        .apply {
+                            putExtra("pubkey", feed.feedItem.pubkey)
+                        })
             }
             R.id.tv_reply -> {
                 startActivity(
                     Intent(this, UserDetailActivity::class.java)
-                    .apply {
-                        putExtra("pubkey", feed.feedItem.getReplyTos()!![0])
-                    })
+                        .apply {
+                            putExtra("pubkey", feed.feedItem.getReplyTos()!![0])
+                        })
             }
-            R.id.iv_content_img->{
-                val intent= Intent(this, ImageDetailActivity::class.java)
-                intent.putExtra("img_url",feed.findImageUrl())
+            R.id.iv_content_img -> {
+                val intent = Intent(this, ImageDetailActivity::class.java)
+                intent.putExtra("img_url", feed.findImageUrl())
                 startActivity(
                     intent,
                     ActivityOptionsCompat.makeSceneTransitionAnimation(

@@ -15,7 +15,11 @@
         app:navigationIcon="@drawable/baseline_arrow_back_24"
         android:id="@+id/toolbar"
         android:layout_height="wrap_content"/>
-
+<!--    <com.google.android.material.materialswitch.MaterialSwitch-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:checked="false"-->
+<!--        />-->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"

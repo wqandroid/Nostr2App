@@ -11,7 +11,6 @@ import nostr.postr.db.FollowUserKey
 import nostr.postr.db.NostrDB
 import nostr.postr.db.UserProfile
 import nostr.postr.events.*
-import nostr.postr.ui.dashboard.FollowInfo
 import nostr.postr.ui.feed.Feed
 import nostr.postr.util.MD5
 import java.util.*

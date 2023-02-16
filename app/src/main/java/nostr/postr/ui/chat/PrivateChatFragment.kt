@@ -1,4 +1,4 @@
-package nostr.postr.ui.dashboard
+package nostr.postr.ui.chat
 
 import android.content.Intent
 import android.os.Bundle
@@ -14,15 +14,16 @@ import nostr.postr.R
 import nostr.postr.core.AccountManger
 import nostr.postr.databinding.FragmentDashboardBinding
 import nostr.postr.db.ChatRoom
+import nostr.postr.ui.chat.viewmodel.PrivateChatViewModel
 import nostr.postr.ui.user.UserDetailActivity
 import nostr.postr.util.UIUtils.makeGone
 import nostr.postr.util.UIUtils.makeVisibility
 
-class PrivateChatFragment : Fragment(), ChatAdapter.ItemChildClickListener {
+class PrivateChatFragment : Fragment(), ChatListAdapter.ItemChildClickListener {
 
     lateinit var binding: FragmentDashboardBinding
 
-    private val chatAdapter by lazy { ChatAdapter() }
+    private val chatAdapter by lazy { ChatListAdapter() }
     private val viewModel by viewModels<PrivateChatViewModel>()
 
     override fun onCreateView(
@@ -43,16 +44,16 @@ class PrivateChatFragment : Fragment(), ChatAdapter.ItemChildClickListener {
                 it.clickListener = this@PrivateChatFragment
             }
         }
-        this.viewModel.chatRoomLiveDat.observe(viewLifecycleOwner) {
-            it.sortedByDescending { it.lastUpdate }.filter {
-                it.sendTo == AccountManger.getPublicKey() ||
-                        it.content.isNullOrEmpty()
-            }
-            binding.tvTitleChat.text="Chat(${it.size})"
-            chatAdapter.differ.submitList(it)
+        this.viewModel.chatRoomLiveDat.observe(viewLifecycleOwner) { rooms ->
+            binding.tvTitleChat.text = "Chat(${rooms.size})"
+            chatAdapter.differ.submitList(rooms.filter {
+                it.sendTo != AccountManger.getPublicKey() &&
+                        it.content.isNotEmpty()
+            }.sortedByDescending { it.lastUpdate })
         }
 
         viewModel.followList.observe(viewLifecycleOwner) {
+            it.filter { it.pubkey == AccountManger.getPublicKey() }
             binding.tvFollowCount.text = "已关注(${it.count()})"
             if (it.isNotEmpty()) {
                 binding.hz.makeVisibility()
@@ -72,17 +73,20 @@ class PrivateChatFragment : Fragment(), ChatAdapter.ItemChildClickListener {
                             })
                     }
                 }
-
-
             } else {
                 binding.hz.makeGone()
             }
         }
 
         viewModel.subFollows(AccountManger.getPublicKey())
-        viewModel.loadChat()
+
     }
 
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.loadChat()
+    }
 
     override fun onClick(chatRoom: ChatRoom, itemView: View) {
         if (itemView.id == R.id.cl_root) {

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:orientation="vertical"
     android:layout_height="match_parent"
-    tools:context=".ui.dashboard.ChatActivity">
+    tools:context=".ui.chat.ChatActivity">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:layout_width="match_parent"

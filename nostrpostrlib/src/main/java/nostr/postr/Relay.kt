@@ -51,8 +51,8 @@ class Relay(
         subscriptionId: String,
         filters: MutableList<JsonFilter> = mutableListOf(JsonFilter())
     ) {
-        subscriptions[subscriptionId] = filters
-        sendFilter(subscriptionId)
+//        subscriptions[subscriptionId] = filters
+        sendFilter(subscriptionId,filters)
     }
 
     fun justConnection() {
@@ -112,7 +112,7 @@ class Relay(
                         println(text)
                         println("------------------")
                     }
-                    listeners.forEach { it.onEvent(event, subscriptionId, this@Relay) }
+                    listeners.forEach { it.onEvent(event, channel, this@Relay) }
                 }
                 "EOSE" -> listeners.forEach {
                     it.onRelayStateChange(Type.EOSE, this@Relay)
@@ -161,9 +161,9 @@ class Relay(
         socket.close(1000, "Normal close")
     }
 
-    private fun sendFilter(requestId: String) {
-        val filters =
-            subscriptions[requestId] ?: error("No filter(s) found.")
+    private fun sendFilter(requestId: String,filters: MutableList<JsonFilter>) {
+//        val filters =
+//            subscriptions[requestId] ?: error("No filter(s) found.")
 
         val request = """["REQ","$requestId",${filters.joinToString(",") { it.toJson() }}]"""
         if (socket != null && isOpen) {

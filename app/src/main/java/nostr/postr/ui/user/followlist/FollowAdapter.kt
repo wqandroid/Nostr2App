@@ -1,21 +1,15 @@
-package nostr.postr.ui.dashboard
+package nostr.postr.ui.user.followlist
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import fr.acinq.secp256k1.Hex
-import nostr.postr.databinding.FragmentFeedItemBinding
+import nostr.postr.core.AccountManger
 import nostr.postr.databinding.ItemFollowUserBinding
-import nostr.postr.db.FeedItem
 import nostr.postr.db.UserProfile
-import nostr.postr.toNpub
-import nostr.postr.util.UIUtils.makeGone
-import nostr.postr.util.UIUtils.makeVisibility
-import java.util.regex.Pattern
 
-data class FollowInfo(val pubkey: String, val name: String?, var userProfile: UserProfile?){
+data class FollowInfo(val pubkey: String, val name: String?, var userProfile: UserProfile?) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -25,6 +19,14 @@ data class FollowInfo(val pubkey: String, val name: String?, var userProfile: Us
         if (pubkey != other.pubkey) return false
 
         return true
+    }
+
+    fun getAvatar(): String {
+        return if (userProfile == null) {
+            "https://robohash.org/${pubkey}.png"
+        } else {
+            return userProfile!!.getUserAvatar()
+        }
     }
 
     override fun hashCode(): Int {
@@ -52,13 +54,23 @@ class FollowAdapter(var listData: MutableList<FollowInfo>) :
             if (item.userProfile == null) item.name ?: item.pubkey else item.userProfile?.bestName()
 
 
-        Glide.with(holder.binding.ivAvatar).load(item.userProfile?.picture).into(
+        Glide.with(holder.binding.ivAvatar).load(item.getAvatar()).into(
             holder.binding.ivAvatar
         )
 
         holder.binding.ivAvatar.setOnClickListener {
             clickListener?.onClick(item, it)
         }
+
+        if (AccountManger.follows.contains(item.pubkey)) {
+            holder.binding.mbtFollow.text = "UnFollow"
+        } else {
+            holder.binding.mbtFollow.text = "Follow"
+        }
+        holder.binding.mbtFollow.setOnClickListener {
+            clickListener?.onClick(item,it)
+        }
+
     }
 
 

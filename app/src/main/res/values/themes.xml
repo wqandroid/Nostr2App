@@ -34,7 +34,15 @@
         <item name="colorSurfaceInverse">@color/md_theme_inverseSurface</item>
         <item name="colorPrimaryInverse">@color/md_theme_primaryInverse</item>
 
-
+        <item name="android:windowSplashScreenBackground" tools:targetApi="s">
+            @color/md_theme_primary
+        </item>
+        <item name="android:windowSplashScreenIconBackgroundColor" tools:targetApi="s">
+            @color/md_theme_primary
+        </item>
+        <item name="android:windowSplashScreenAnimationDuration" tools:targetApi="s">1000</item>
+        <item name="android:windowSplashScreenBehavior" tools:targetApi="tiramisu">icon_preferred
+        </item>
     </style>
 
     <style name="AppTheme.NoActionBar">

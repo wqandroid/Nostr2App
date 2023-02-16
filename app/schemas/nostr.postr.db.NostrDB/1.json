@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "c1f06b2e41958bee0dd0b6f08125b39a",
+    "identityHash": "d247f257a22471924090786af74f66fb",
     "entities": [
       {
         "tableName": "feed_info",
@@ -150,7 +150,7 @@
       },
       {
         "tableName": "chat",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`msgId` TEXT NOT NULL, `roomId` TEXT NOT NULL, `content` TEXT NOT NULL, `createAt` INTEGER NOT NULL, `createPubKey` TEXT NOT NULL, `isRead` INTEGER NOT NULL, `success` INTEGER NOT NULL, PRIMARY KEY(`msgId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`msgId` TEXT NOT NULL, `roomId` TEXT NOT NULL, `content` TEXT NOT NULL, `createAt` INTEGER NOT NULL, `createPubKey` TEXT NOT NULL, `success` INTEGER NOT NULL, PRIMARY KEY(`msgId`))",
         "fields": [
           {
             "fieldPath": "msgId",
@@ -183,12 +183,6 @@
             "notNull": true
           },
           {
-            "fieldPath": "isRead",
-            "columnName": "isRead",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
             "fieldPath": "success",
             "columnName": "success",
             "affinity": "INTEGER",
@@ -206,7 +200,7 @@
       },
       {
         "tableName": "chat_room",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`roomId` TEXT NOT NULL, `sendTo` TEXT NOT NULL, `content` TEXT NOT NULL, `lastUpdate` INTEGER NOT NULL, PRIMARY KEY(`roomId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`roomId` TEXT NOT NULL, `sendTo` TEXT NOT NULL, `content` TEXT NOT NULL, `lastUpdate` INTEGER NOT NULL, `hasUnread` INTEGER NOT NULL, PRIMARY KEY(`roomId`))",
         "fields": [
           {
             "fieldPath": "roomId",
@@ -229,6 +223,12 @@
           {
             "fieldPath": "lastUpdate",
             "columnName": "lastUpdate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hasUnread",
+            "columnName": "hasUnread",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -278,7 +278,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c1f06b2e41958bee0dd0b6f08125b39a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd247f257a22471924090786af74f66fb')"
     ]
   }
 }

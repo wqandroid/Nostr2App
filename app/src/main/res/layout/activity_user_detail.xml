@@ -19,29 +19,31 @@
             style="@style/Widget.MaterialComponents.Toolbar.Primary"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:fitsSystemWindows="true"
             android:background="@color/md_theme_surface"
-            app:statusBarScrim="@color/md_theme_surface"
+            android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorSurface"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:statusBarScrim="@color/md_theme_surface"
             app:titleEnabled="false"
             app:toolbarId="@+id/toolbar">
 
             <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
-                android:orientation="vertical"
-                android:fitsSystemWindows="true"
+                android:layout_height="wrap_content"
                 android:background="?colorSurface"
-                android:layout_height="wrap_content">
+                android:fitsSystemWindows="true"
+                android:orientation="vertical">
 
                 <FrameLayout
-                    android:background="?colorTertiary"
                     android:layout_width="match_parent"
-                    android:layout_height="170dp">
+                    android:layout_height="170dp"
+                    android:background="?colorPrimaryContainer">
+
                     <ImageView
                         android:id="@+id/iv_banner"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:contentDescription="背景"
                         android:fitsSystemWindows="true"
                         android:scaleType="centerCrop" />
 
@@ -49,13 +51,15 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:background="#40000000"
+                        android:contentDescription="blur"
                         android:fitsSystemWindows="true" />
+
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/iv_avatar"
                         android:layout_width="72dp"
                         android:layout_height="72dp"
-                        android:layout_marginStart="22dp"
                         android:layout_gravity="bottom"
+                        android:layout_marginStart="22dp"
                         android:layout_marginBottom="-36dp"
                         android:background="@color/md_theme_tertiaryContainer"
                         android:padding="2dp"
@@ -63,21 +67,38 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_goneMarginStart="16dp"
                         app:shapeAppearance="@style/round_circle"
-                        app:strokeColor="@color/md_theme_onTertiary"
+                        app:strokeColor="@color/md_theme_surface"
                         app:strokeWidth="2dp" />
 
                     <com.google.android.material.button.MaterialButton
-                        android:layout_width="wrap_content"
-                        android:text="Chat"
-                        android:id="@+id/mbt_chat"
-                        android:layout_marginBottom="3dp"
-                        android:layout_marginEnd="16dp"
-                        app:backgroundTint="@color/md_theme_onTertiary"
+                        android:id="@+id/mbtFollow"
                         style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="72dp"
+                        android:layout_height="42dp"
                         android:layout_gravity="end|bottom"
-                        android:layout_height="wrap_content"/>
+                        android:layout_marginEnd="@dimen/fab_margin"
+                        android:layout_marginBottom="3dp"
+                        android:enabled="false"
+                        android:text="Follow"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="4dp"
+                        app:layout_anchor="@id/app_bar" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/mbt_chat"
+                        style="@style/Widget.Material3.Button.IconButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="42dp"
+                        android:layout_marginEnd="90dp"
+                        android:layout_marginBottom="3dp"
+                        android:layout_gravity="end|bottom"
+                        app:backgroundTint="@color/md_theme_tertiary"
+                        app:icon="@drawable/round_chat_24"
+                        app:iconTint="@color/md_theme_onTertiary"
+                        />
 
                 </FrameLayout>
+
                 <androidx.appcompat.widget.LinearLayoutCompat
                     android:id="@+id/ll_content"
                     android:layout_width="match_parent"
@@ -87,21 +108,54 @@
                     android:paddingEnd="16dp"
                     app:layout_constraintBottom_toBottomOf="parent">
 
-                    <com.google.android.material.imageview.ShapeableImageView
-                        android:layout_width="72dp"
-                        android:layout_height="72dp"
-                        android:id="@+id/iv_avatar2"
-                        android:layout_marginStart="6dp"
-                        android:layout_marginTop="-36dp"
-                        android:layout_gravity="bottom"
-                        android:background="@color/md_theme_tertiaryContainer"
-                        android:padding="2dp"
-                        app:layout_constraintBottom_toTopOf="@id/ll_content"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_goneMarginStart="16dp"
-                        app:shapeAppearance="@style/round_circle"
-                        app:strokeColor="@color/md_theme_onTertiary"
-                        app:strokeWidth="2dp" />
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="42dp">
+
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/iv_avatar2"
+                            android:layout_width="72dp"
+                            android:layout_height="72dp"
+                            android:layout_gravity="bottom"
+                            android:layout_marginStart="6dp"
+                            android:layout_marginTop="-36dp"
+                            android:background="@color/md_theme_tertiaryContainer"
+                            android:padding="2dp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_goneMarginStart="16dp"
+                            app:shapeAppearance="@style/round_circle"
+                            app:strokeColor="@color/md_theme_surface"
+                            app:strokeWidth="2dp" />
+
+
+                        <TextView
+                            android:id="@+id/tv_followers"
+                            style="@style/TextAppearance.Material3.BodyMedium"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end|bottom"
+                            android:layout_marginEnd="6dp"
+                            android:text="0 Followers"
+                            android:textColor="?colorOnSurface"
+                            android:visibility="gone"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/tv_follows"
+                            android:layout_marginTop="8dp"
+                            style="@style/TextAppearance.Material3.BodyMedium"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end|bottom"
+                            android:text="0 Follows"
+                            android:textColor="?colorOnSurface"
+                            app:layout_constraintEnd_toStartOf="@id/tv_followers"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
                     <TextView
@@ -119,11 +173,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:drawableStart="@drawable/svg_nip05_auth"
                         android:drawablePadding="2dp"
-                        android:text="sss@ss"
                         android:visibility="gone"
-                        />
+                        app:drawableStartCompat="@drawable/svg_nip05_auth" />
 
 
                     <TextView
@@ -131,8 +183,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:lines="1"
                         android:ellipsize="end"
+                        android:lines="1"
                         android:textColor="@color/md_theme_primary"
                         android:textSize="12sp"
                         android:visibility="gone"
@@ -146,69 +198,38 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:text=""
-                        android:minLines="2"
                         android:visibility="visible" />
 
                 </androidx.appcompat.widget.LinearLayoutCompat>
 
 
-
             </androidx.appcompat.widget.LinearLayoutCompat>
-
 
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?actionBarSize"
+                android:fitsSystemWindows="false"
                 app:collapseIcon="@drawable/baseline_arrow_back_24"
                 app:contentInsetStart="1dp"
-                android:fitsSystemWindows="false"
-                app:title=""
                 app:layout_collapseMode="pin"
-                app:navigationIconTint="@color/md_theme_onSurface"
                 app:navigationIcon="@drawable/baseline_arrow_back_24"
+                app:navigationIconTint="@color/md_theme_onSurface"
                 app:popupTheme="@style/Theme.DrawDemo.PopupOverlay"
-                >
-
-<!--                <ImageView-->
-<!--                    android:layout_width="56dp"-->
-<!--                    android:layout_height="56dp"-->
-<!--                    android:layout_gravity="end"-->
-<!--                    android:scaleType="center"-->
-<!--                    app:tint="@color/md_theme_onSurface"-->
-<!--                    android:src="@drawable/baseline_more_vert_24" />-->
-
-
-
-
-            </com.google.android.material.appbar.MaterialToolbar>
+                app:title="" />
 
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
         <ProgressBar
-            app:layout_anchor="@id/app_bar"
             android:id="@+id/progress_horizontal"
             style="@style/Widget.AppCompat.ProgressBar.Horizontal"
             android:layout_width="match_parent"
             android:layout_height="2dp"
-            android:indeterminate="true" />
+            android:indeterminate="true"
+            app:layout_anchor="@id/app_bar" />
     </com.google.android.material.appbar.AppBarLayout>
-
-
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/mbtFollow"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/fab_margin"
-        app:layout_anchor="@id/app_bar"
-        android:text="Follow"
-        android:minHeight="48dp"
-        android:enabled="false"
-        app:layout_anchorGravity="bottom|end"
-        app:icon="@drawable/baseline_person_add_24" />
-
 
 
     <androidx.recyclerview.widget.RecyclerView
@@ -219,7 +240,6 @@
         tools:context=".ui.user.UserDetailActivity"
         tools:itemCount="3"
         tools:listitem="@layout/fragment_feed_item" />
-
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

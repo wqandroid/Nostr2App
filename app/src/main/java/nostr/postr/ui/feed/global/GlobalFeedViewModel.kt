@@ -77,7 +77,7 @@ class GlobalFeedViewModel : WsViewModel() {
                 )
                 postFeedList(feed)
             } else {
-                Log.e("TextNoteEvent--->${tempList.size}", textEvent.toJson())
+//                Log.e("TextNoteEvent--->${tempList.size}", textEvent.toJson())
             }
         }
     }

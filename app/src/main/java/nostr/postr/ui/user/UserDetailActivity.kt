@@ -1,13 +1,11 @@
 package nostr.postr.ui.user
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -24,10 +22,10 @@ import nostr.postr.databinding.ActivityUserDetailBinding
 import nostr.postr.db.ChatRoom
 import nostr.postr.db.NostrDB
 import nostr.postr.db.UserProfile
-import nostr.postr.ui.AppViewModel
-import nostr.postr.ui.dashboard.ChatActivity
+import nostr.postr.ui.chat.ChatActivity
 import nostr.postr.ui.feed.Feed
 import nostr.postr.ui.feed.FeedAdapter
+import nostr.postr.ui.user.followlist.UserFollowsListAct
 import nostr.postr.util.UIUtils.makeGone
 import nostr.postr.util.UIUtils.makeVisibility
 
@@ -38,11 +36,9 @@ class UserDetailActivity : BaseAct() {
     private lateinit var pubkey: String
 
     private val userViewModel by viewModels<UserViewModel>()
-
-    private val adapter by lazy { FeedAdapter() }
     private var list = mutableListOf<Feed>()
+    private val adapter by lazy { FeedAdapter(false, list) }
     private val set = mutableSetOf<String>()
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,41 +71,38 @@ class UserDetailActivity : BaseAct() {
         }
 
         userViewModel.feedLiveData.observe(this) {
-            if (!set.contains(it.feedItem.id)) {
-                set.add(it.feedItem.id)
-                list.add(it)
-                list.sortByDescending { it.feedItem.created_at }
-                adapter.differ.submitList(mutableListOf<Feed>().apply {
-                    this.addAll(list)
-                }) {
-                    binding.rvFeed.scrollToPosition(0)
-                }
-                binding.progressHorizontal.makeGone()
-            }
+            set.add(it.feedItem.id)
+            list.add(it)
+            list.sortByDescending { it.feedItem.created_at }
+            adapter.notifyDataSetChanged()
+            binding.progressHorizontal.makeGone()
         }
 
         binding.toolbar.setNavigationOnClickListener {
             finish()
         }
         binding.mbtFollow.isVisible = pubkey != AccountManger.getPublicKey()
+        binding.mbtChat.isVisible = pubkey != AccountManger.getPublicKey()
 
 
         userViewModel.followList.observe(this) {
-            val isFollowing = it.any { it.pubkey == AccountManger.getPublicKey() }
-            if (isFollowing) {
-                binding.mbtFollow.text = "Following(${list.size})"
-            } else {
-                binding.mbtFollow.text = "Follow(${list.size})"
+            binding.tvFollows.text = "${it.size} Follows"
+            binding.tvFollows.setOnClickListener {
+                startActivity(Intent(this, UserFollowsListAct::class.java).apply {
+                    putExtra("publicKey", pubkey)
+                })
             }
-            binding.mbtFollow.isEnabled = true
         }
-
+//        userViewModel.followersList.observe(this) {
+//            binding.tvFollowers.text = "${it.size} Followers"
+//        }
         AccountManger.follows.let {
             if (AccountManger.follows.contains(pubkey)) {
-                binding.mbtFollow.icon = getDrawable(R.drawable.baseline_person_remove_24)
+                binding.mbtFollow.text = "UnFollow"
             } else {
-                binding.mbtFollow.icon = getDrawable(R.drawable.baseline_person_add_24)
+                binding.mbtFollow.text = "Follow"
             }
+            binding.mbtFollow.isEnabled = true
             binding.mbtFollow.setOnClickListener { v ->
                 userViewModel.addFlow(
                     pubkey,
@@ -121,7 +114,6 @@ class UserDetailActivity : BaseAct() {
 
         binding.mbtChat.setOnClickListener {
 
-
             userViewModel.viewModelScope.launch(Dispatchers.IO) {
                 val roomid = "${pubkey}-${AccountManger.getPublicKey()}"
 
@@ -129,7 +121,7 @@ class UserDetailActivity : BaseAct() {
                     .chatDao().getChatRoomById(roomid)
 
                 if (chatRoom == null) {
-                    ChatRoom(roomId = roomid, pubkey, "", System.currentTimeMillis() / 1000)
+                    ChatRoom(roomId = roomid, pubkey, "", System.currentTimeMillis() / 1000, false)
                         .also {
                             NostrDB.getDatabase(MyApplication._instance)
                                 .chatDao().createChatRoom(it)
@@ -152,6 +144,12 @@ class UserDetailActivity : BaseAct() {
                 }
             })
     }
+
+
+    private fun updateFollows() {
+
+    }
+
 
     private fun showUser(it: UserProfile) {
         Glide.with(this).load(it.getUserAvatar())
