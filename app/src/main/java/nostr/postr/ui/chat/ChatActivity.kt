@@ -11,12 +11,13 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
 import nostr.postr.MyApplication
 import nostr.postr.core.AccountManger
+import nostr.postr.core.BaseAct
 import nostr.postr.databinding.ActivityChatBinding
 import nostr.postr.db.ChatMessage
 import nostr.postr.db.NostrDB
 import nostr.postr.ui.chat.viewmodel.PrivateChatViewModel
 
-class ChatActivity : AppCompatActivity() {
+class ChatActivity : BaseAct() {
 
     lateinit var binding: ActivityChatBinding
 
@@ -33,6 +34,7 @@ class ChatActivity : AppCompatActivity() {
         binding = ActivityChatBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
+        showBack()
         msgAdapter = ChatMsgAdapter(list)
         binding.recyclerView
             .apply {

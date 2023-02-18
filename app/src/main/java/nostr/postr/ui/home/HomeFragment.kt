@@ -23,6 +23,7 @@ import nostr.postr.databinding.FragmentFeedBinding
 import nostr.postr.ui.ImageDetailActivity
 import nostr.postr.ui.feed.Feed
 import nostr.postr.ui.feed.FeedAdapter
+import nostr.postr.ui.feed.FeedDetailActivity
 import nostr.postr.ui.feed.PublishActivity
 import nostr.postr.ui.feed.global.GlobalFeedActivity
 import nostr.postr.ui.user.UserDetailActivity
@@ -87,7 +88,7 @@ class HomeFragment : Fragment(), FeedAdapter.ItemChildClickListener {
     }
 
     private fun anim() {
-        val animation = RotateAnimation(0f,360f,1,0.5f, 1,0.5f)
+        val animation = RotateAnimation(0f, 360f, 1, 0.5f, 1, 0.5f)
         animation.startOffset = 0 // 开始动画延迟
         animation.duration = 1800 // 动画持续时间
         animation.repeatCount = -1 // 重放次数（所以动画的播放次数=重放次数+1），为infinite时无限重复(-1也能实现无限)
@@ -102,6 +103,8 @@ class HomeFragment : Fragment(), FeedAdapter.ItemChildClickListener {
             if (it.isNotEmpty()) {
                 binding.emptyLayout.makeGone()
             }
+            binding.rvFeed.layoutManager!!.scrollToPosition(0)
+
         }
         //        feedViewModel.loadBlockUser()
         feedViewModel.loadFeedFromDB()
@@ -120,6 +123,11 @@ class HomeFragment : Fragment(), FeedAdapter.ItemChildClickListener {
 
     override fun onClick(feed: Feed, itemView: View) {
         when (itemView.id) {
+            R.id.ll_root -> {
+                startActivity(Intent(requireContext(), FeedDetailActivity::class.java).apply {
+                    putExtra("feedId", feed.feedItem.id)
+                })
+            }
             R.id.iv_more -> {
                 Log.e("account", "block${MD5.md5(feed.feedItem.content)}")
                 //            feedViewModel.addBlock(feed.feedItem.pubkey,feed.feedItem.content)
@@ -137,16 +145,16 @@ class HomeFragment : Fragment(), FeedAdapter.ItemChildClickListener {
                     })
             }
             R.id.iv_content_img -> {
-                val intent = Intent(requireActivity(), ImageDetailActivity::class.java)
-                intent.putExtra("img_url", feed.findImageUrl())
-                startActivity(
-                    intent,
-                    ActivityOptionsCompat.makeSceneTransitionAnimation(
-                        requireActivity(),
-                        itemView,
-                        "search"
-                    ).toBundle()
-                )
+//                val intent = Intent(requireActivity(), ImageDetailActivity::class.java)
+//                intent.putExtra("img_url", feed.findImageUrl())
+//                startActivity(
+//                    intent,
+//                    ActivityOptionsCompat.makeSceneTransitionAnimation(
+//                        requireActivity(),
+//                        itemView,
+//                        "search"
+//                    ).toBundle()
+//                )
             }
         }
     }

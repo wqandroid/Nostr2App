@@ -47,6 +47,8 @@ class MainActivity : BaseAct() {
         navView.setupWithNavController(navController)
 
 
+        navView.getOrCreateBadge(R.id.navigation_dashboard).isVisible = true
+
 
 //        MyApplication.getViewModel().reqMainUserInfo()
     }

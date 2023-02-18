@@ -13,6 +13,7 @@ class TextNoteEvent(
 ) : Event(id, pubKey, createdAt, kind, tags, content, sig) {
     @Transient
     val replyTos: List<String>
+
     @Transient
     val mentions: List<String>
 
@@ -28,8 +29,12 @@ class TextNoteEvent(
         return replyTos.isNotEmpty()
     }
 
+    fun isMentions(): Boolean {
+        return mentions.isNotEmpty()
+    }
+
     fun isFeed(): Boolean {
-        return mentions.isNullOrEmpty()
+        return !isReply() && !isMentions()
     }
 
     fun tag2JsonString(): String {

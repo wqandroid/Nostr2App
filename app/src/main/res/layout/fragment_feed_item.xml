@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/ll_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -49,9 +50,9 @@
                 android:id="@+id/iv_ln6"
                 android:layout_width="18dp"
                 android:layout_height="18dp"
-                android:visibility="gone"
                 android:layout_marginStart="3dp"
                 android:src="@drawable/baseline_electric_bolt_24"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="@id/tv_display_name"
                 app:layout_constraintStart_toEndOf="@id/tv_display_name"
                 app:layout_constraintTop_toTopOf="@id/tv_display_name"
@@ -102,19 +103,25 @@
                 app:layout_constraintTop_toBottomOf="@id/tv_reply" />
 
 
-            <ImageView
-                android:id="@+id/iv_content_img"
-                android:layout_width="wrap_content"
-                android:layout_height="180dp"
-                android:layout_marginStart="12dp"
-                android:background="@color/md_theme_secondaryContainer"
-                android:visibility="gone"
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/ll_content_img"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="24dp"
+                android:orientation="vertical"
                 app:layout_constraintBottom_toTopOf="@id/tv_time"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_content" />
+                app:layout_constraintTop_toBottomOf="@id/tv_content">
+
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
 
 
             <TextView
+                android:layout_marginTop="20dp"
                 android:id="@+id/tv_time"
                 style="@style/TextAppearance.Material3.LabelSmall"
                 android:layout_width="wrap_content"

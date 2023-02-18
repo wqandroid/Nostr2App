@@ -53,12 +53,13 @@ class PrivateChatFragment : Fragment(), ChatListAdapter.ItemChildClickListener {
         }
 
         viewModel.followList.observe(viewLifecycleOwner) {
-            it.filter { it.pubkey == AccountManger.getPublicKey() }
+
             binding.tvFollowCount.text = "已关注(${it.count()})"
             if (it.isNotEmpty()) {
                 binding.hz.makeVisibility()
                 binding.llFollow.removeAllViews()
-                it.sortedByDescending { it.userProfile?.picture }.forEach { follow ->
+                it.filter { it.pubkey != AccountManger.getPublicKey() }
+                    .sortedByDescending { it.userProfile?.picture }.forEach { follow ->
                     val root = LayoutInflater.from(requireContext())
                         .inflate(R.layout.view_avatar_follow, null)
                     val imageView = root.findViewById<ImageView>(R.id.iv_avatar)

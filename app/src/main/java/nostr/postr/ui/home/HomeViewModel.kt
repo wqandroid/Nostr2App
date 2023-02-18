@@ -166,7 +166,7 @@ class HomeViewModel : WsViewModel() {
 //                        ) return@launch
 
             if (subscriptionId != followSubscriptionId) return@launch
-
+            if (textEvent.isMentions() || textEvent.isReply())return@launch
             if (setIds.contains(textEvent.id.toHex())) return@launch
             setIds.add(textEvent.id.toHex())
             var feed = FeedItem(

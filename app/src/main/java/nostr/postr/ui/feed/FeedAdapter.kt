@@ -1,10 +1,13 @@
 package nostr.postr.ui.feed
 
+import android.app.Activity
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.text.buildSpannedString
+import android.widget.ImageView
+import androidx.appcompat.widget.LinearLayoutCompat
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
@@ -17,11 +20,15 @@ import nostr.postr.databinding.FragmentFeedItemBinding
 import nostr.postr.db.FeedItem
 import nostr.postr.db.UserProfile
 import nostr.postr.toNpub
+import nostr.postr.ui.ImageDetailActivity
 import nostr.postr.ui.user.UserDetailActivity
 import nostr.postr.util.UIUtils
 import nostr.postr.util.UIUtils.makeGone
 import nostr.postr.util.UIUtils.makeVisibility
 import nostr.postr.util.buildSpannableString
+import java.net.MalformedURLException
+import java.net.URISyntaxException
+import java.net.URL
 import java.util.regex.Pattern
 
 
@@ -31,16 +38,34 @@ val videoExtension: Pattern = Pattern.compile("(.*/)*.+\\.(mp4|avi|wmv|mpg|amv|w
 
 data class Feed(val feedItem: FeedItem, val userProfile: UserProfile?) {
 
-    fun findImageUrl(): String? {
-        val m = imageExtension.matcher(feedItem.content)
-        val m2 = videoExtension.matcher(feedItem.content)
-        if (m.find()) {
-            return m.group()
+
+    private fun isValidURL(url: String?): Boolean {
+        return try {
+            URL(url).toURI()
+            true
+        } catch (e: MalformedURLException) {
+            false
+        } catch (e: URISyntaxException) {
+            false
         }
-        if (m2.find()) {
-            return m2.group()
+    }
+
+    fun findImageUrl(): List<String> {
+        val urs = mutableListOf<String>()
+        feedItem.content.split('\n').forEach { word ->
+            if (isValidURL(word)) {
+                val m = imageExtension.matcher(word)
+                if (m.find()) {
+                    urs.add(m.group())
+                }
+
+                val m2 = videoExtension.matcher(word)
+                if (m2.find()) {
+                    urs.add(m2.group())
+                }
+            }
         }
-        return null
+        return urs
     }
 
     fun getUserAvatar(): String {
@@ -129,19 +154,55 @@ class FeedAdapter(val isUseDiff: Boolean = true, val data: List<Feed> = mutableL
                 holder.binding.ivAvatar
             )
 
-        if (item.findImageUrl().isNullOrEmpty()) {
-            holder.binding.ivContentImg.visibility = View.GONE
+        val listUrls = item.findImageUrl()
+        if (listUrls.isEmpty()) {
+//            holder.binding.llContentImg.visibility = View.GONE
+            holder.binding.llContentImg.removeAllViews()
         } else {
-//            Log.e("matches", "--->${m.group()}---${item.feedItem.content}")
-            holder.binding.ivContentImg.visibility = View.VISIBLE
-            Glide.with(holder.binding.ivAvatar).load(item.findImageUrl()!!).into(
-                holder.binding.ivContentImg
-            )
-            holder.binding.ivContentImg.setOnClickListener {
-                clickListener?.onClick(item, it)
+//            holder.binding.llContentImg.makeVisibility()
+            holder.binding.llContentImg.removeAllViews()
+
+            var newContent = item.feedItem.content
+
+            listUrls.forEach { url ->
+
+                val imageView = ImageView(holder.itemView.context)
+                imageView.maxHeight=720
+                imageView.maxWidth=720
+//                imageView.scaleType=ImageView.ScaleType.CENTER_INSIDE
+                val p= LinearLayoutCompat.LayoutParams(
+                    LinearLayoutCompat.LayoutParams.MATCH_PARENT,
+                    LinearLayoutCompat.LayoutParams.WRAP_CONTENT
+                )
+                holder.binding.llContentImg
+                    .addView(imageView,p)
+
+
+                Glide.with(holder.binding.ivAvatar).load(url).into(
+                    imageView
+                )
+                imageView.setOnClickListener {
+                    val intent = Intent(holder.itemView.context, ImageDetailActivity::class.java)
+                    intent.putExtra("img_url", url)
+                    holder.itemView.context.startActivity(
+                        intent,
+                        ActivityOptionsCompat.makeSceneTransitionAnimation(
+                            holder.itemView.context as Activity,
+                            it,
+                            "search"
+                        ).toBundle()
+                    )
+                }
+
+                newContent= newContent.replace(url, "")
+                newContent=newContent.replace("\n","")
             }
+            holder.binding.tvContent.text = newContent
         }
 
+        holder.binding.root.setOnClickListener {
+            clickListener?.onClick(item, it)
+        }
         holder.binding.ivMore.setOnClickListener {
             clickListener?.onClick(item, it)
         }

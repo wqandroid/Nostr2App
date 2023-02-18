@@ -3,8 +3,8 @@
 
     <solid android:color="@color/md_theme_primaryInverse"/>
 
-    <corners android:topLeftRadius="8dp" android:topRightRadius="8dp"
-        android:bottomRightRadius="8dp"/>
+    <corners android:topLeftRadius="@dimen/chat_bg_radius" android:topRightRadius="@dimen/chat_bg_radius"
+        android:bottomRightRadius="@dimen/chat_bg_radius"/>
 
 
 </shape>

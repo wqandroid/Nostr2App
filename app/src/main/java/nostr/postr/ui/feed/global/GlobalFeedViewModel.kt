@@ -29,6 +29,10 @@ class GlobalFeedViewModel : WsViewModel() {
 
     private val userMap = mutableMapOf<String, UserProfile>()
 
+    private val set= mutableSetOf<String>("同城","服务好","破处直播","交流群","推广","成人抖阴","小机器人","腾讯","BELONS")
+
+    private val blocKey= setOf<String>("35e8d69e112de24d753014477d92b2634de4f7657a3ea1f5dac6dd812ce4dfeb")
+
 
     override fun onRecMetadataEvent(subscriptionId: String, event: MetadataEvent) {
         super.onRecMetadataEvent(subscriptionId, event)
@@ -56,11 +60,14 @@ class GlobalFeedViewModel : WsViewModel() {
     override fun onRecTextNoteEvent(subscriptionId: String, textEvent: TextNoteEvent) {
         super.onRecTextNoteEvent(subscriptionId, textEvent)
         if (subscriptionId != mainSubscriptionId) return
+        if (blocKey.contains(textEvent.pubKey.toHex()))return
         scope.launch {
 //                        if (blockList.contains(textEvent.pubKey.toHex()) || blockContentList.contains(
 //                                MD5.md5(textEvent.content)
 //                            )
 //                        ) return@launch
+
+
 
             val startChart = if (textEvent.content.length > 7) textEvent.content.substring(
                 0,
@@ -68,6 +75,9 @@ class GlobalFeedViewModel : WsViewModel() {
             ) else textEvent.content
             if (!tempList.contains(startChart)) {
                 tempList.add(startChart)
+
+                val laji=set.any { textEvent.content.contains(it) }
+                if (laji)return@launch
                 var feed = FeedItem(
                     textEvent.id.toString(),
                     textEvent.pubKey.toHex(),
