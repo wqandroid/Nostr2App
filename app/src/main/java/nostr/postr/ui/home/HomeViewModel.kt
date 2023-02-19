@@ -170,7 +170,7 @@ class HomeViewModel : WsViewModel() {
             if (setIds.contains(textEvent.id.toHex())) return@launch
             setIds.add(textEvent.id.toHex())
             var feed = FeedItem(
-                textEvent.id.toString(),
+                textEvent.id.toHex(),
                 textEvent.pubKey.toHex(),
                 textEvent.createdAt,
                 textEvent.content,
@@ -215,8 +215,7 @@ class HomeViewModel : WsViewModel() {
         val filter = mutableListOf(
             JsonFilter(
                 authors = mutableListOf(pubKey),
-                kinds = mutableListOf(0),
-                limit = 1
+                kinds = mutableListOf(0,2),
             ),
             JsonFilter(
                 authors = mutableListOf(pubKey),

@@ -1,12 +1,13 @@
-package nostr.postr.ui.feed
+package nostr.postr.ui.feed.detail
 
 import android.util.Log
-import fr.acinq.secp256k1.Hex
+import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.*
 import nostr.postr.*
 import nostr.postr.core.WsViewModel
 import nostr.postr.db.*
 import nostr.postr.events.*
+import nostr.postr.ui.feed.Feed
 import java.util.*
 
 class FeedDetailViewModel : WsViewModel() {
@@ -20,9 +21,11 @@ class FeedDetailViewModel : WsViewModel() {
     private val followSubscriptionId = "follow_feed${UUID.randomUUID().toString().substring(0..5)}"
 
 
-    private var profileList = mutableListOf<String>()
-
     private val setIds = mutableSetOf<String>()
+
+    val feedLiveData = MutableLiveData<List<Feed>>()
+
+    private val list = mutableListOf<Feed>()
 
 
     override fun onRecMetadataEvent(subscriptionId: String, event: MetadataEvent) {
@@ -32,7 +35,7 @@ class FeedDetailViewModel : WsViewModel() {
         }
 
         event.contactMetaData.let {
-            val userProfile = UserProfile(event.pubKey.toHex()).apply {
+            val profile = UserProfile(event.pubKey.toHex()).apply {
                 this.name = it.name
                 this.about = it.about
                 this.picture = it.picture
@@ -42,9 +45,14 @@ class FeedDetailViewModel : WsViewModel() {
                 this.website = it.website
                 this.lud16 = it.lud16
             }
-
+            scope.launch {
+                getDB().profileDao().insertUser(profile)
+            }
+            list.find { it.feedItem.pubkey == profile.pubkey }?.apply {
+                this.userProfile = profile
+                feedLiveData.postValue(list)
+            }
         }
-
     }
 
     override fun onRecTextNoteEvent(subscriptionId: String, textEvent: TextNoteEvent) {
@@ -62,10 +70,19 @@ class FeedDetailViewModel : WsViewModel() {
                 textEvent.tag2JsonString()
             )
 
+            val p = getDB().profileDao().getUserInfo(feed.pubkey)
+
+            list.add(Feed(feed, p))
+
+            feedLiveData.postValue(list.sortedBy { it.feedItem.created_at })
+
+            if (p == null) {
+                reqProfile(mutableListOf(feed.pubkey))
+            }
         }
     }
 
-    fun reqFeedInfo(id: String="0433d88da8fa203b20932cbdd73345a34b2bcff2c49e125087d67a2b4299ac42") {
+    fun reqFeedInfo(id: String = "0433d88da8fa203b20932cbdd73345a34b2bcff2c49e125087d67a2b4299ac42") {
         val map = mutableMapOf<String, List<String>>()
             .apply {
                 this["e"] = listOf(id)

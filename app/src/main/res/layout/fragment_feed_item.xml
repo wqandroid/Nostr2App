@@ -153,7 +153,7 @@
                 android:src="@drawable/outline_mode_comment_24"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/iv_content_img"
+                app:layout_constraintTop_toBottomOf="@id/ll_content_img"
                 app:tint="@color/md_theme_onSecondaryContainer" />
 
 
@@ -165,7 +165,7 @@
                 android:src="@drawable/baseline_repeat_24"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@id/iv_comment"
-                app:layout_constraintTop_toBottomOf="@id/iv_content_img"
+                app:layout_constraintTop_toBottomOf="@id/ll_content_img"
                 app:tint="@color/md_theme_onSecondaryContainer" />
 
             <ImageView
@@ -176,7 +176,7 @@
                 android:src="@drawable/baseline_favorite_border_24"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@id/iv_repat"
-                app:layout_constraintTop_toBottomOf="@id/iv_content_img"
+                app:layout_constraintTop_toBottomOf="@id/ll_content_img"
                 app:tint="@color/md_theme_onSecondaryContainer" />
 
 

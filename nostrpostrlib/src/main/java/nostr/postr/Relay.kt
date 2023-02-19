@@ -1,10 +1,7 @@
 package nostr.postr
 
 import com.google.gson.JsonElement
-import nostr.postr.events.ContactListEvent
-import nostr.postr.events.Event
-import nostr.postr.events.MetadataEvent
-import nostr.postr.events.PrivateDmEvent
+import nostr.postr.events.*
 import okhttp3.*
 import java.util.concurrent.ConcurrentSkipListSet
 import java.util.concurrent.TimeUnit
@@ -52,7 +49,7 @@ class Relay(
         filters: MutableList<JsonFilter> = mutableListOf(JsonFilter())
     ) {
 //        subscriptions[subscriptionId] = filters
-        sendFilter(subscriptionId,filters)
+        sendFilter(subscriptionId, filters)
     }
 
     fun justConnection() {
@@ -62,7 +59,7 @@ class Relay(
 
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 isOpen = true
-                retryTime=700L
+                retryTime = 700L
                 sendFailedMsgSet.forEach {
                     webSocket.send(it)
                     Thread.sleep(100)
@@ -91,7 +88,7 @@ class Relay(
                 Thread.sleep(retryTime)
                 //遇到错误在重新链接
                 justConnection()
-                retryTime+=700
+                retryTime += 700
             }
         }
         socket = httpClient.newWebSocket(request, listener)
@@ -107,7 +104,7 @@ class Relay(
             when (type) {
                 "EVENT" -> {
                     val event = Event.fromJson(msg[2], Client.lenient)
-                    if (event is PrivateDmEvent) {
+                    if (event.kind == 2) {
                         println("------------------")
                         println(text)
                         println("------------------")
@@ -161,7 +158,7 @@ class Relay(
         socket.close(1000, "Normal close")
     }
 
-    private fun sendFilter(requestId: String,filters: MutableList<JsonFilter>) {
+    private fun sendFilter(requestId: String, filters: MutableList<JsonFilter>) {
 //        val filters =
 //            subscriptions[requestId] ?: error("No filter(s) found.")
 

@@ -40,7 +40,7 @@ abstract class WsViewModel : ViewModel() {
                     onRecTextNoteEvent(subscriptionId, event as TextNoteEvent)
                 }
                 RecommendRelayEvent.kind -> {
-                    Log.d("RecommendRelayEvent--->", event.toJson())
+                    Log.e("RecommendRelayEvent--->", event.toJson())
                 }
             }
         }

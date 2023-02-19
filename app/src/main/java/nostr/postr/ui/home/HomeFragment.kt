@@ -1,29 +1,23 @@
 package nostr.postr.ui.home
 
-import android.animation.ValueAnimator
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
 import android.view.animation.LinearInterpolator
 import android.view.animation.RotateAnimation
-import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import nostr.postr.R
 import nostr.postr.databinding.FragmentFeedBinding
-import nostr.postr.ui.ImageDetailActivity
 import nostr.postr.ui.feed.Feed
 import nostr.postr.ui.feed.FeedAdapter
-import nostr.postr.ui.feed.FeedDetailActivity
+import nostr.postr.ui.feed.detail.FeedDetailActivity
 import nostr.postr.ui.feed.PublishActivity
 import nostr.postr.ui.feed.global.GlobalFeedActivity
 import nostr.postr.ui.user.UserDetailActivity
@@ -125,7 +119,7 @@ class HomeFragment : Fragment(), FeedAdapter.ItemChildClickListener {
         when (itemView.id) {
             R.id.ll_root -> {
                 startActivity(Intent(requireContext(), FeedDetailActivity::class.java).apply {
-                    putExtra("feedId", feed.feedItem.id)
+                    putExtra("feed", feed)
                 })
             }
             R.id.iv_more -> {
@@ -144,17 +138,8 @@ class HomeFragment : Fragment(), FeedAdapter.ItemChildClickListener {
                         putExtra("pubkey", feed.feedItem.getReplyTos()!![0])
                     })
             }
-            R.id.iv_content_img -> {
-//                val intent = Intent(requireActivity(), ImageDetailActivity::class.java)
-//                intent.putExtra("img_url", feed.findImageUrl())
-//                startActivity(
-//                    intent,
-//                    ActivityOptionsCompat.makeSceneTransitionAnimation(
-//                        requireActivity(),
-//                        itemView,
-//                        "search"
-//                    ).toBundle()
-//                )
+            R.id.iv_comment -> {
+                PublishActivity.start(requireContext(), feed, true)
             }
         }
     }

@@ -1,15 +1,18 @@
 package nostr.postr.ui.user.followlist
 
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import kotlinx.parcelize.Parcelize
 import nostr.postr.core.AccountManger
 import nostr.postr.databinding.ItemFollowUserBinding
 import nostr.postr.db.UserProfile
 
-data class FollowInfo(val pubkey: String, val name: String?, var userProfile: UserProfile?) {
+@Parcelize
+data class FollowInfo(val pubkey: String, val name: String?, var userProfile: UserProfile?):Parcelable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

@@ -1,15 +1,17 @@
 package nostr.postr.db
 
+import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.parcelize.Parcelize
 import nostr.postr.bechToBytes
 
-
+@Parcelize
 @Entity(tableName = "user_profile")
 class UserProfile(
     @PrimaryKey
     val pubkey: String
-) {
+) :Parcelable{
 
     var about: String? = null
     var banner: String? = null

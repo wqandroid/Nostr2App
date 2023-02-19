@@ -68,7 +68,7 @@ class UserViewModel : WsViewModel() {
             Log.e("textEvent--->${event.id.toHex()}", event.toJson())
             idSet.add(event.id.toHex())
             var feed = nostr.postr.db.FeedItem(
-                event.id.toString(),
+                event.id.toHex(),
                 event.pubKey.toHex(),
                 event.createdAt,
                 event.content,
@@ -121,8 +121,7 @@ class UserViewModel : WsViewModel() {
             val filters = mutableListOf(
                 JsonFilter(
                     authors = mutableListOf(pubKey),
-                    kinds = mutableListOf(0),
-                    limit = 1
+                    kinds = mutableListOf(0,2),
                 ),
                 JsonFilter(
                     authors = mutableListOf(pubKey),

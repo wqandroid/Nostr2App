@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/iv_avatar"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        android:layout_margin="12dp"
+        android:padding="1dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearance="@style/round_circle"
+        app:strokeColor="@color/md_theme_tertiary"
+        app:strokeWidth="1dp" />
+
+    <TextView
+        android:id="@+id/tv_display_name"
+        style="@style/TextAppearance.Material3.TitleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:ellipsize="middle"
+        android:lines="1"
+        android:maxWidth="110dp"
+        android:maxLength="22"
+        android:text="Name"
+        app:layout_constraintStart_toEndOf="@id/iv_avatar"
+        app:layout_constraintTop_toTopOf="@id/iv_avatar" />
+
+
+    <TextView
+        android:id="@+id/tv_time"
+        style="@style/TextAppearance.Material3.LabelSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:text="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/iv_avatar" />
+
+
+    <TextView
+        android:id="@+id/tv_reply"
+        style="@style/TextAppearance.MaterialComponents.Body2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:text="replay@re"
+        android:visibility="visible"
+        app:layout_constraintStart_toStartOf="@id/tv_display_name"
+        app:layout_constraintTop_toBottomOf="@id/tv_display_name" />
+
+
+    <TextView
+        android:id="@+id/tv_content"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="12dp"
+        android:autoLink="all"
+        android:gravity="left"
+        android:text="c"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/tv_reply"
+        app:layout_constraintTop_toBottomOf="@id/tv_reply" />
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/ll_content_img"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="24dp"
+        android:gravity="start"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/tv_content"
+        app:layout_constraintTop_toBottomOf="@id/tv_content" />
+
+
+    <ImageView
+        android:id="@+id/iv_comment"
+        android:layout_width="64dp"
+        android:layout_height="46dp"
+        android:scaleType="center"
+        android:src="@drawable/outline_mode_comment_24"
+        app:layout_constraintStart_toStartOf="@id/tv_content"
+        app:layout_constraintTop_toBottomOf="@id/ll_content_img"
+        app:tint="@color/md_theme_onSecondaryContainer" />
+
+
+    <ImageView
+        android:id="@+id/iv_repat"
+        android:layout_width="64dp"
+        android:layout_height="46dp"
+        android:scaleType="center"
+        android:src="@drawable/baseline_repeat_24"
+        app:layout_constraintStart_toEndOf="@id/iv_comment"
+        app:layout_constraintTop_toBottomOf="@id/ll_content_img"
+        app:tint="@color/md_theme_onSecondaryContainer" />
+
+    <ImageView
+        android:id="@+id/iv_like"
+        android:layout_width="64dp"
+        android:layout_height="46dp"
+        android:scaleType="center"
+        android:src="@drawable/baseline_favorite_border_24"
+        app:layout_constraintStart_toEndOf="@id/iv_repat"
+        app:layout_constraintTop_toBottomOf="@id/ll_content_img"
+        app:tint="@color/md_theme_onSecondaryContainer" />
+
+
+    <com.google.android.material.divider.MaterialDivider
+        android:layout_width="match_parent"
+        app:dividerInsetStart="68dp"
+        app:dividerInsetEnd="14dp"
+        app:layout_constraintTop_toBottomOf="@id/iv_like"
+        android:layout_height="1px"/>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

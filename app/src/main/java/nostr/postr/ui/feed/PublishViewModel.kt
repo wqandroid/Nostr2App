@@ -10,27 +10,24 @@ import nostr.postr.events.TextNoteEvent
 class PublishViewModel : WsViewModel() {
 
 
-    val sendLiveDta= MutableLiveData<Int>(0)
+    val sendLiveDta = MutableLiveData<Int>(0)
 
 
     override fun onOk(relay: Relay) {
         super.onOk(relay)
-        Log.e("publish","___${relay.url}")
+        Log.e("publish", "___${relay.url}")
         sendLiveDta.postValue(1)
     }
 
 
-
-
-    fun sendPost(text:String) {
+    fun sendPost(text: String, replyTos: List<String>?, mentions: List<String>?) {
         val event = TextNoteEvent.create(
             text,
-            mutableListOf(),
-            mutableListOf(),
+            replyTos,
+            mentions,
             AccountManger.getPrivateKey()
         )
-
-        sendLiveDta.value=0
+        sendLiveDta.value = 0
         wsClient.value.send(event)
     }
 
