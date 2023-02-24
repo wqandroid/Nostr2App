@@ -7,7 +7,7 @@ This repository consists of multiple modules that will eventually be split into 
 repositories but as long as the basic libraries and tools are in very active development, juggling
 multiple repositories isn't worth it yet.
 
-![Image text](https://github.com/wqandroid/Nostr2App/raw/dev/app/screenshort/1.jpg)
+![Image text](https://github.com/wqandroid/Nostr2App/blob/master/app/screenshort/1.jpg?raw=true)
 ![Image text](https://github.com/wqandroid/Nostr2App/raw/dev/app/screenshort/2.jpg)
 ![Image text](https://github.com/wqandroid/Nostr2App/raw/dev/app/screenshort/3.jpg)
 
