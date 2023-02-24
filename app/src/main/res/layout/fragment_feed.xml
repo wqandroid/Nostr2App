@@ -19,13 +19,7 @@
         app:titleCentered="true">
 
 
-        <ImageView
-            android:id="@+id/iv_add"
-            android:layout_width="50dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="end"
-            android:src="@drawable/baseline_add_24"
-            app:tint="?colorOnSurface" />
+
 
         <ImageView
             android:id="@+id/iv_public_feed"
@@ -48,7 +42,7 @@
         app:icon="@drawable/baseline_whatshot_24" />
 
 
-    <FrameLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -79,7 +73,17 @@
 
         </androidx.appcompat.widget.LinearLayoutCompat>
 
-    </FrameLayout>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_gravity="end|bottom"
+            android:layout_margin="22dp"
+            android:id="@+id/fab"
+            android:transitionName="shared_element_container"
+            app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"
+            android:src="@drawable/baseline_add_24"
+            android:layout_height="wrap_content"/>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 
 </androidx.appcompat.widget.LinearLayoutCompat>

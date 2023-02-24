@@ -75,8 +75,10 @@ class HomeViewModel : WsViewModel() {
                     )
                 } else {
                     room.hasUnread = true
-                    room.content = content
-                    room.lastUpdate = event.createdAt
+                    if (room.lastUpdate < event.createdAt) {
+                        room.content = content
+                        room.lastUpdate = event.createdAt
+                    }
                 }
                 getDB().chatDao().createChatRoom(room)
                 ChatMessage(
@@ -166,7 +168,7 @@ class HomeViewModel : WsViewModel() {
 //                        ) return@launch
 
             if (subscriptionId != followSubscriptionId) return@launch
-            if (textEvent.isMentions() || textEvent.isReply())return@launch
+            if (textEvent.isMentions() || textEvent.isReply()) return@launch
             if (setIds.contains(textEvent.id.toHex())) return@launch
             setIds.add(textEvent.id.toHex())
             var feed = FeedItem(
@@ -215,7 +217,7 @@ class HomeViewModel : WsViewModel() {
         val filter = mutableListOf(
             JsonFilter(
                 authors = mutableListOf(pubKey),
-                kinds = mutableListOf(0,2),
+                kinds = mutableListOf(0, 2),
             ),
             JsonFilter(
                 authors = mutableListOf(pubKey),

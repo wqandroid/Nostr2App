@@ -5,8 +5,12 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.view.Window
 import android.widget.Toast
 import androidx.activity.viewModels
+import com.google.android.material.transition.platform.MaterialContainerTransform
+import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
 import nostr.postr.*
 import nostr.postr.core.AccountManger
 import nostr.postr.core.BaseAct
@@ -30,6 +34,15 @@ class PublishActivity : BaseAct() {
     private var mentionsList: MutableList<String> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        findViewById<View>(android.R.id.content).transitionName = "shared_element_container"
+        window.sharedElementEnterTransition = MaterialContainerTransform().apply {
+            addTarget(android.R.id.content)
+            duration = 600L
+        }
+        window.sharedElementReturnTransition = MaterialContainerTransform().apply {
+            addTarget(android.R.id.content)
+            duration = 450L
+        }
         super.onCreate(savedInstanceState)
         binding = ActivityPublishBinding.inflate(layoutInflater)
         setContentView(binding.root)

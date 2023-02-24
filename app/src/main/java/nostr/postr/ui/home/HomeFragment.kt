@@ -1,5 +1,6 @@
 package nostr.postr.ui.home
 
+import android.app.ActivityOptions
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -65,9 +66,16 @@ class HomeFragment : Fragment(), FeedAdapter.ItemChildClickListener {
                 .openDrawer(GravityCompat.START)
         }
 
-        binding.ivAdd.setOnClickListener {
-            startActivity(Intent(requireContext(), PublishActivity::class.java))
+
+        binding.fab.setOnClickListener {
+            val intent=Intent(requireContext(), PublishActivity::class.java)
+
+            val options=ActivityOptions.makeSceneTransitionAnimation(
+                requireActivity(),it,"shared_element_container"
+            )
+            startActivity(intent,options.toBundle())
         }
+
         binding.ivPublicFeed.setOnClickListener {
             startActivity(Intent(requireContext(), GlobalFeedActivity::class.java))
         }
@@ -118,9 +126,10 @@ class HomeFragment : Fragment(), FeedAdapter.ItemChildClickListener {
     override fun onClick(feed: Feed, itemView: View) {
         when (itemView.id) {
             R.id.ll_root -> {
+                val options=ActivityOptions.makeSceneTransitionAnimation(requireActivity(),itemView,"transition_feed_content")
                 startActivity(Intent(requireContext(), FeedDetailActivity::class.java).apply {
                     putExtra("feed", feed)
-                })
+                },options.toBundle())
             }
             R.id.iv_more -> {
                 Log.e("account", "block${MD5.md5(feed.feedItem.content)}")
