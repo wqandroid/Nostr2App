@@ -7,6 +7,10 @@ This repository consists of multiple modules that will eventually be split into 
 repositories but as long as the basic libraries and tools are in very active development, juggling
 multiple repositories isn't worth it yet.
 
+![Image text](https://github.com/wqandroid/Nostr2App/raw/dev/app/screenshort/1.jpg)
+![Image text](https://github.com/wqandroid/Nostr2App/raw/dev/app/screenshort/2.jpg)
+![Image text](https://github.com/wqandroid/Nostr2App/raw/dev/app/screenshort/3.jpg)
+
 ## NIP support
 
 Library, Relay and/or App implement the following NIPs. Not all NIPs apply to all parts and some
