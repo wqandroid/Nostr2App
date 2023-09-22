@@ -91,3 +91,4 @@ fun TextView.buildSpannableString(init: DslSpannableStringBuilder.() -> Unit) {
     //通过实现类返回SpannableStringBuilder
     text = spanStringBuilderImpl.build()
 }
+

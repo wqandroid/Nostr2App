@@ -4,8 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewAnimationUtils
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.animation.doOnStart
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -67,13 +69,24 @@ class AccountDrawFragment : Fragment() {
         }
 
         binding.ivDay.setOnClickListener {
-            if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-                binding.ivDay.setImageResource(R.drawable.baseline_light_mode_24)
-            } else {
-                binding.ivDay.setImageResource(R.drawable.baseline_mode_night_24)
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+
+
+            val x = binding.llRoot.width * 0.8F
+
+            val anim =
+                ViewAnimationUtils.createCircularReveal(binding.llRoot, x.toInt(), 150, 100f, 1080f)
+
+            anim.doOnStart {
+                if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                    binding.ivDay.setImageResource(R.drawable.baseline_light_mode_24)
+                } else {
+                    binding.ivDay.setImageResource(R.drawable.baseline_mode_night_24)
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                }
             }
+            anim.duration = 600
+            anim.start()
         }
 
         updateLoginStatus()
