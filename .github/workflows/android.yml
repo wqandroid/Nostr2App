@@ -10,8 +10,9 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    steps:
 
-   - name: Checkout
+      - name: Checkout
         uses: actions/checkout@v2
 
       - name: set up JDK 1.8
@@ -30,7 +31,6 @@ jobs:
         id: buildRelease
         run: ./gradlew assembleRelease
 
-      //添加这个打包好的APK可以进行本地下载
       - uses: actions/upload-artifact@v2
         name: upload build output
         with:
